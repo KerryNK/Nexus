@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DeAI Nexus Terminal - Live Bittensor Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--bg:#080810;--bg2:#0d0d18;--bg3:#141420;--card:#12121c;--bdr:#252538;--txt:#f4f4f8;--txt2:#a0a0b8;--mute:#606078;--violet:#8b5cf6;--cyan:#06b6d4;--green:#10b981;--amber:#f59e0b;--rose:#f43f5e;--grad:linear-gradient(135deg,#8b5cf6,#06b6d4)}
+.light{--bg:#f5f5fa;--bg2:#fff;--bg3:#eef;--card:#fff;--bdr:#dde;--txt:#18182a;--txt2:#556;--mute:#889}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
+.hdr{background:var(--bg2);border-bottom:1px solid var(--bdr);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
+.logo{display:flex;align-items:center;gap:12px}.logo-i{width:40px;height:40px;background:var(--grad);border-radius:10px;display:flex;align-items:center;justify-content:center}.logo-i svg{width:24px;height:24px}
+.logo-t{font-size:18px;font-weight:700}.logo-t span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.logo-s{font-size:10px;color:var(--mute)}
+.hdr-r{display:flex;align-items:center;gap:14px}.hdr-st{display:flex;gap:16px}.st-i{text-align:right}.st-l{font-size:9px;color:var(--mute);text-transform:uppercase}.st-v{font-size:14px;font-weight:700;color:var(--cyan);font-family:'JetBrains Mono',monospace}
+.theme{background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:8px;cursor:pointer;color:var(--txt);font-size:14px;transition:all 0.2s}
+.theme:hover{border-color:var(--violet)}
+.live{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);color:var(--green);padding:5px 10px;border-radius:16px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:5px}
+.live.error{background:rgba(244,63,94,.12);border-color:rgba(244,63,94,.25);color:var(--rose)}
+.live.syncing{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.25);color:var(--amber)}
+.live-d{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+.live.error .live-d{background:var(--rose)}
+.live.syncing .live-d{background:var(--amber)}
+@keyframes pulse{50%{opacity:.5}}
+.refresh{background:var(--violet);border:1px solid var(--violet);border-radius:8px;padding:8px 14px;cursor:pointer;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;transition:all 0.2s}
+.refresh:hover{background:#7c3aed;transform:translateY(-1px)}
+.refresh:active{transform:translateY(0)}
+.refresh:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.refresh svg{width:16px;height:16px}
+.refresh.spinning svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.cnt{max-width:1600px;margin:0 auto;padding:16px 20px}
+.tabs{display:flex;gap:4px;margin-bottom:16px;background:var(--bg2);padding:4px;border-radius:10px;border:1px solid var(--bdr);width:fit-content}
+.tab{padding:8px 18px;background:transparent;border:none;border-radius:7px;color:var(--txt2);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.tab:hover{color:var(--txt);background:var(--bg3)}.tab.act{background:var(--grad);color:#fff}
+.alert{background:var(--card);border:2px solid var(--amber);border-radius:12px;padding:16px;margin-bottom:16px;display:flex;align-items:start;gap:12px}
+.alert.info{border-color:var(--cyan)}
+.alert.error{border-color:var(--rose)}
+.alert.success{border-color:var(--green)}
+.alert-icon{font-size:24px;line-height:1}
+.alert-content{flex:1}
+.alert-title{font-size:14px;font-weight:700;margin-bottom:6px}
+.alert-msg{font-size:12px;color:var(--txt2);line-height:1.5}
+.alert-close{cursor:pointer;color:var(--mute);font-size:20px;line-height:1;padding:0 4px}
+.alert-close:hover{color:var(--txt)}
+.kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+.kpi-c{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px;position:relative;overflow:hidden;transition:all 0.3s}
+.kpi-c:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(139,92,246,0.15)}
+.kpi-c::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kpi-c.v::before{background:var(--grad)}.kpi-c.g::before{background:var(--green)}.kpi-c.c::before{background:var(--cyan)}.kpi-c.a::before{background:var(--amber)}.kpi-c.r::before{background:var(--rose)}
+.kpi-l{font-size:9px;color:var(--mute);text-transform:uppercase;margin-bottom:4px}.kpi-v{font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace}.kpi-s{font-size:10px;color:var(--mute);margin-top:2px}
+.leaderboard-sec{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:16px}
+.leaderboard-t{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.leaderboard-t svg{width:20px;height:20px;color:var(--amber)}
+.leaderboard-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.lb-col{background:var(--bg3);border-radius:10px;padding:12px}
+.lb-col-t{font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:10px;text-transform:uppercase}
+.lb-item{background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:10px;margin-bottom:8px;display:flex;align-items:center;gap:10px;transition:all 0.2s}
+.lb-item:hover{border-color:var(--violet);transform:translateX(4px);box-shadow:0 4px 12px rgba(139,92,246,0.1)}
+.lb-rank{font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--mute);min-width:30px}
+.lb-rank.gold{color:#fbbf24}.lb-rank.silver{color:#9ca3af}.lb-rank.bronze{color:#fb923c}
+.lb-info{flex:1;min-width:0}.lb-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-cat{font-size:9px;color:var(--mute)}
+.lb-val{font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--green)}
+.chr{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin-bottom:16px}
+.chr-c{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px}
+.chr-t{font-size:12px;font-weight:600;margin-bottom:12px;color:var(--txt2)}.chr-b{height:180px}
+.flt{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:12px;flex-wrap:wrap}.flt-l{display:flex;gap:12px;flex-wrap:wrap}.flt-r{display:flex;gap:12px;align-items:center}
+.pills{display:flex;gap:4px;flex-wrap:wrap}.pill{padding:5px 12px;background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;color:var(--txt2);font-size:10px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.pill:hover{border-color:var(--violet);transform:translateY(-1px)}.pill.act{background:var(--grad);border-color:transparent;color:#fff}
+.srt{position:relative}.srt-b{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--card);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-size:12px;font-weight:600;cursor:pointer;min-width:160px;transition:all 0.2s}
+.srt-b:hover{border-color:var(--violet)}.srt-b svg{width:14px;height:14px;color:var(--mute)}.srt-b .arr{margin-left:auto;transition:transform .2s}
+.srt.open .arr{transform:rotate(180deg)}.srt-d{position:absolute;top:calc(100% + 4px);left:0;background:var(--card);border:1px solid var(--bdr);border-radius:8px;min-width:180px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:50;display:none}
+.srt.open .srt-d{display:block}.srt-o{padding:10px 14px;font-size:12px;color:var(--txt2);cursor:pointer;transition:all 0.2s}
+.srt-o:hover{background:var(--bg3);color:var(--txt)}.srt-o.act{background:#3b82f6;color:#fff}
+.scf{display:flex;align-items:center;gap:10px;padding:6px 14px;background:var(--card);border:1px solid var(--bdr);border-radius:8px}
+.scf-l{font-size:11px;color:var(--txt2);font-weight:600;display:flex;align-items:center;gap:6px}.scf-l svg{width:14px;height:14px;color:var(--violet)}
+.scf input{-webkit-appearance:none;width:100px;height:4px;background:var(--bg3);border-radius:2px}
+.scf input::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--violet);border-radius:50%;cursor:pointer}
+.scf-v{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--violet);min-width:20px}
+.srch{background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:8px 12px;color:var(--txt);font-size:11px;width:160px}
+.srch:focus{outline:none;border-color:var(--violet)}
+.info{font-size:10px;color:var(--mute);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.info-refresh{font-family:'JetBrains Mono',monospace;color:var(--cyan)}
+.list{display:flex;flex-direction:column;gap:6px}
+.row{background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;cursor:pointer;transition:all 0.2s}
+.row:hover{border-color:var(--violet);box-shadow:0 4px 12px rgba(139,92,246,0.1)}.row.exp{border-color:var(--violet)}
+.row-h{display:grid;grid-template-columns:44px 180px 85px 85px 85px 85px 70px;align-items:center;padding:10px 14px;gap:6px}
+.row-id{width:38px;height:38px;border-radius:8px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;color:#fff;font-family:'JetBrains Mono',monospace}
+.row-i{min-width:0}.row-n{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row-m{font-size:9px;color:var(--mute)}
+.met{text-align:right}.met-l{font-size:8px;color:var(--mute);text-transform:uppercase;margin-bottom:1px}
+.met-v{font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace}.met-s{font-size:9px}
+.up{color:var(--green)}.dn{color:var(--rose)}
+.scr{display:inline-flex;align-items:center;justify-content:center;padding:4px 10px;border-radius:6px;font-weight:700;font-size:12px;font-family:'JetBrains Mono',monospace}
+.scr-e{background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.25)}
+.scr-g{background:rgba(6,182,212,.12);color:var(--cyan);border:1px solid rgba(6,182,212,.25)}
+.scr-f{background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.25)}
+.scr-p{background:rgba(244,63,94,.12);color:var(--rose);border:1px solid rgba(244,63,94,.25)}
+.row-x{display:none;border-top:1px solid var(--bdr);background:var(--bg3)}.row.exp .row-x{display:block}
+.exp-g{padding:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.exp-g2{padding:0 14px 14px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.det{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:12px}
+.det-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.det-t{font-size:10px;font-weight:700;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.det-t.v{color:var(--violet)}.det-t.c{color:var(--cyan)}.det-t.g{color:var(--green)}.det-t.a{color:var(--amber)}.det-t.rs{color:var(--rose)}
+.det-b{font-size:8px;padding:2px 6px;border-radius:4px;font-weight:600}
+.bg{background:rgba(16,185,129,.15);color:var(--green)}.ba{background:rgba(245,158,11,.15);color:var(--amber)}.br{background:rgba(244,63,94,.15);color:var(--rose)}
+.det-g{display:grid;grid-template-columns:1fr 1fr;gap:6px}.det-g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.det-i{background:var(--bg3);border-radius:5px;padding:8px}.det-il{font-size:8px;color:var(--mute);text-transform:uppercase;margin-bottom:2px}
+.det-iv{font-size:13px;font-weight:600;font-family:'JetBrains Mono',monospace}
+.det-n{font-size:9px;color:var(--mute);margin-top:8px;padding:6px;background:var(--bg3);border-radius:4px;border-left:2px solid var(--cyan)}
+.det-th{font-size:11px;color:var(--txt2);margin-bottom:10px;line-height:1.4}
+.ms-l{font-size:9px;color:var(--mute);text-transform:uppercase;margin:10px 0 6px;font-weight:600}
+.ms-i{background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:8px 10px;margin-bottom:4px;font-size:11px;color:var(--txt2);display:flex;align-items:center;gap:8px}
+.ms-i::before{content:'•';color:var(--green);font-weight:bold}
+.rsk-i{background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.2);border-radius:6px;padding:8px 10px;margin-bottom:4px;font-size:11px;color:var(--amber);display:flex;align-items:center;gap:8px}
+.rsk-i::before{content:'⚠';color:var(--amber)}
+.calc{display:none}.calc.act{display:block}
+.calc-g{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.calc-c{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:16px}
+.calc-t{font-size:14px;font-weight:700;margin-bottom:12px}.calc-d{font-size:10px;color:var(--mute);margin-bottom:12px}
+.calc-in{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
+.inp label{display:block;font-size:8px;color:var(--mute);text-transform:uppercase;margin-bottom:2px;font-weight:600}
+.inp input{width:100%;padding:8px;background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;color:var(--txt);font-size:12px;font-family:'JetBrains Mono',monospace}
+.inp input:focus{outline:none;border-color:var(--violet)}
+.calc-r{background:var(--bg3);border-radius:10px;padding:14px;text-align:center}
+.calc-rl{font-size:8px;color:var(--mute);text-transform:uppercase;margin-bottom:3px}
+.calc-rv{font-size:26px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.calc-rs{font-size:10px;color:var(--mute);margin-top:2px}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.mini-i{background:var(--bg3);border-radius:6px;padding:8px;text-align:center}
+.mini-v{font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.mini-l{font-size:7px;color:var(--mute);text-transform:uppercase;margin-top:1px}
+.meth{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-top:14px}
+.meth-t{font-size:14px;font-weight:700;margin-bottom:12px;color:var(--cyan)}
+.meth-p{font-size:11px;color:var(--txt2);line-height:1.5;margin-bottom:10px}
+.meth-f{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--violet);background:var(--bg3);padding:8px;border-radius:6px;margin-top:8px}
+.ftr{margin-top:16px;padding:10px 14px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;display:flex;justify-content:space-between;align-items:center;font-size:10px}
+.ftr-b{color:var(--txt2)}.ftr-b strong{color:var(--txt)}.ftr-m{color:var(--mute);display:flex;gap:12px}
+.loading{text-align:center;padding:40px;color:var(--mute)}
+.loading-spinner{width:40px;height:40px;border:4px solid var(--bg3);border-top-color:var(--violet);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px}
+@media(max-width:1400px){.kpi{grid-template-columns:repeat(3,1fr)}.exp-g,.exp-g2{grid-template-columns:repeat(2,1fr)}.row-h{grid-template-columns:40px 150px 75px 75px 75px 60px}.leaderboard-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1100px){.chr{grid-template-columns:1fr}.row-h{grid-template-columns:40px 1fr 70px 70px 60px}.met:nth-child(4),.met:nth-child(5){display:none}.exp-g,.exp-g2{grid-template-columns:1fr}.leaderboard-grid{grid-template-columns:1fr}}
+@media(max-width:800px){.kpi{grid-template-columns:repeat(2,1fr)}.calc-g{grid-template-columns:1fr}.hdr-st{display:none}.flt{flex-direction:column;align-items:stretch}}
+</style>
+</head>
+<body>
+<header class="hdr">
+<div class="logo">
+<div class="logo-i">
+<svg viewBox="0 0 100 100" fill="none">
+<circle cx="50" cy="50" r="42" stroke="#fff" stroke-width="5"/>
+<circle cx="50" cy="50" r="16" fill="#fff"/>
+<line x1="50" y1="8" x2="50" y2="34" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+<line x1="50" y1="66" x2="50" y2="92" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+<line x1="8" y1="50" x2="34" y2="50" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+<line x1="66" y1="50" x2="92" y2="50" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+</svg>
+</div>
+<div>
+<div class="logo-t">DeAI <span>Nexus</span></div>
+<div class="logo-s">Bittensor Intelligence • Backend Powered</div>
+</div>
+</div>
+<div class="hdr-r">
+<div class="hdr-st">
+<div class="st-i"><div class="st-l">TAO</div><div class="st-v" id="taoPrice">Loading...</div></div>
+<div class="st-i"><div class="st-l">Subnets</div><div class="st-v" id="subnetCount">-</div></div>
+<div class="st-i"><div class="st-l">MCap</div><div class="st-v" id="totalMcap">-</div></div>
+<div class="st-i"><div class="st-l">Emissions</div><div class="st-v">3,600τ</div></div>
+</div>
+<button class="refresh" id="refreshBtn" onclick="refreshData()">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+</svg>
+Refresh
+</button>
+<button class="theme" onclick="document.body.classList.toggle('light')">🌓</button>
+<div class="live" id="liveIndicator"><div class="live-d"></div><span id="liveStatus">Offline</span></div>
+</div>
+</header>
+
+<div class="cnt">
+<div id="alertContainer"></div>
+
+<div class="tabs">
+<button class="tab act" onclick="showTab('dash',this)">📊 Dashboard</button>
+<button class="tab" onclick="showTab('leader',this)">🏆 Leaderboard</button>
+<button class="tab" onclick="showTab('calc',this)">🧮 DeAI Metrics</button>
+</div>
+
+<!-- Dashboard Tab -->
+<div id="dash">
+<div class="kpi">
+<div class="kpi-c v"><div class="kpi-l">Subnet MCap</div><div class="kpi-v" id="totalSubnetMcap">-</div><div class="kpi-s" id="trackedCount">Loading...</div></div>
+<div class="kpi-c g"><div class="kpi-l">Daily Emissions</div><div class="kpi-v">3,600τ</div><div class="kpi-s" id="emissionsUsd">-</div></div>
+<div class="kpi-c c"><div class="kpi-l">Avg Score</div><div class="kpi-v" id="avgScore">-</div><div class="kpi-s">Composite</div></div>
+<div class="kpi-c a"><div class="kpi-l">Strong Buy</div><div class="kpi-v" id="strongBuy">-</div><div class="kpi-s">Signals</div></div>
+<div class="kpi-c r"><div class="kpi-l">Avg Premium</div><div class="kpi-v" id="avgPrem">-</div><div class="kpi-s">vs Fundamental Value</div></div>
+</div>
+
+<div class="chr">
+<div class="chr-c"><div class="chr-t">Market Cap by Subnet</div><div class="chr-b"><canvas id="mcapChart"></canvas></div></div>
+<div class="chr-c"><div class="chr-t">Categories</div><div class="chr-b"><canvas id="catChart"></canvas></div></div>
+<div class="chr-c"><div class="chr-t">Risk Profile</div><div class="chr-b"><canvas id="riskChart"></canvas></div></div>
+</div>
+
+<div class="flt">
+<div class="flt-l"><div class="pills" id="pills"></div></div>
+<div class="flt-r">
+<div class="srt" id="srtC">
+<button class="srt-b" onclick="document.getElementById('srtC').classList.toggle('open')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M6 12h12M9 18h6"/></svg>
+<span id="srtL">DeAI Score</span>
+<svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+</button>
+<div class="srt-d">
+<div class="srt-o act" onclick="setSort('score','DeAI Score')">DeAI Score</div>
+<div class="srt-o" onclick="setSort('fv','Fund. Value')">Fund. Value</div>
+<div class="srt-o" onclick="setSort('sp','Premium')">Premium (Low→High)</div>
+<div class="srt-o" onclick="setSort('mc','Market Cap')">Market Cap</div>
+<div class="srt-o" onclick="setSort('em','Emission %')">Emission %</div>
+<div class="srt-o" onclick="setSort('pc','24H Change')">24H Change</div>
+<div class="srt-o" onclick="setSort('eff','Emission Efficiency')">Emission Efficiency</div>
+</div>
+</div>
+<div class="scf">
+<span class="scf-l">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+Min:
+</span>
+<input type="range" min="0" max="100" value="0" id="minScr" oninput="filterScore(this.value)">
+<span class="scf-v" id="scrV">0</span>
+</div>
+<input type="text" class="srch" id="srch" placeholder="Search..." oninput="filter()">
+</div>
+</div>
+
+<div class="info">
+<span>Showing <span id="cnt">0</span> subnets • Click to expand</span>
+<span class="info-refresh" id="lastRefresh">Never</span>
+</div>
+<div id="loadingIndicator" class="loading">
+<div class="loading-spinner"></div>
+<div>Connecting to backend...</div>
+</div>
+<div class="list" id="list"></div>
+</div>
+
+<!-- Leaderboard Tab -->
+<div id="leader" class="calc">
+<div class="leaderboard-sec">
+<div class="leaderboard-t">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+<path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+<path d="M4 22h16"></path>
+<path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+<path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+<path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+</svg>
+Top Performing Subnets
+</div>
+<div class="leaderboard-grid">
+<div class="lb-col">
+<div class="lb-col-t">🏆 By DeAI Score</div>
+<div id="lbScore"></div>
+</div>
+<div class="lb-col">
+<div class="lb-col-t">💰 By Market Cap</div>
+<div id="lbMcap"></div>
+</div>
+<div class="lb-col">
+<div class="lb-col-t">📈 Best Value (Low Premium)</div>
+<div id="lbValue"></div>
+</div>
+<div class="lb-col">
+<div class="lb-col-t">⚡ Emission Efficiency</div>
+<div id="lbEfficiency"></div>
+</div>
+</div>
+</div>
+
+<div class="leaderboard-sec" style="margin-top:16px">
+<div class="leaderboard-t">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+<circle cx="9" cy="7" r="4"></circle>
+<path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+</svg>
+Category Leaders
+</div>
+<div id="categoryLeaders"></div>
+</div>
+</div>
+
+<!-- Calculator Tab -->
+<div id="calc" class="calc">
+<div class="calc-g">
+<div class="calc-c">
+<div class="calc-t">📈 Fundamental Value</div>
+<div class="calc-d">OpEx replacement methodology</div>
+<div class="calc-in">
+<div class="inp"><label>Annual OpEx ($)</label><input type="number" id="opex" value="4200000" oninput="calcFV()"></div>
+<div class="inp"><label>Daily Emissions</label><input type="number" id="emit" value="1842" oninput="calcFV()"></div>
+<div class="inp"><label>Token Price ($)</label><input type="number" id="price" value="15.58" oninput="calcFV()"></div>
+<div class="inp"><label>TAO Price</label><input type="number" id="taoP" value="191" oninput="calcFV()"></div>
+</div>
+<div class="calc-r">
+<div class="calc-rl">Fundamental Value</div>
+<div class="calc-rv" id="fvR" style="color:var(--cyan)">$6.25</div>
+<div class="calc-rs" id="fvS">Daily OpEx: $11.5K</div>
+</div>
+<div class="mini">
+<div class="mini-i"><div class="mini-v" id="spR" style="color:var(--amber)">+149%</div><div class="mini-l">Premium</div></div>
+<div class="mini-i"><div class="mini-v" id="pvR" style="color:var(--green)">$8.2M</div><div class="mini-l">PV 4Y</div></div>
+<div class="mini-i"><div class="mini-v" id="trR" style="color:var(--violet)">$18.5K</div><div class="mini-l">Return</div></div>
+</div>
+</div>
+
+<div class="calc-c">
+<div class="calc-t">💰 DCF Fair Value</div>
+<div class="calc-d">Discounted cash flow</div>
+<div class="calc-in">
+<div class="inp"><label>Daily TAO</label><input type="number" id="dcfE" value="246" oninput="calcDCF()"></div>
+<div class="inp"><label>TAO Price</label><input type="number" id="dcfT" value="191" oninput="calcDCF()"></div>
+<div class="inp"><label>Growth %</label><input type="number" id="dcfG" value="5" oninput="calcDCF()"></div>
+<div class="inp"><label>Discount %</label><input type="number" id="dcfD" value="25" oninput="calcDCF()"></div>
+<div class="inp"><label>MCap (TAO)</label><input type="number" id="dcfM" value="340000" oninput="calcDCF()"></div>
+<div class="inp"><label>Years</label><input type="number" id="dcfY" value="5" oninput="calcDCF()"></div>
+</div>
+<div class="calc-r">
+<div class="calc-rl">Fair Value</div>
+<div class="calc-rv" id="dcfR" style="color:var(--green)">412,500τ</div>
+<div class="calc-rs" id="dcfU">≈$78.8M</div>
+</div>
+<div class="mini">
+<div class="mini-i"><div class="mini-v" id="dcfRt" style="color:var(--green)">1.21x</div><div class="mini-l">Ratio</div></div>
+<div class="mini-i"><div class="mini-v" id="dcfUp" style="color:var(--green)">+21%</div><div class="mini-l">Upside</div></div>
+<div class="mini-i"><div class="mini-v" id="dcfSg" style="color:var(--green)">UNDER</div><div class="mini-l">Signal</div></div>
+</div>
+</div>
+
+<div class="calc-c">
+<div class="calc-t">📊 Emissions Revenue</div>
+<div class="calc-d">TAO emissions value</div>
+<div class="calc-in">
+<div class="inp"><label>Emission %</label><input type="number" id="emSh" value="3.42" oninput="calcEm()"></div>
+<div class="inp"><label>TAO Price</label><input type="number" id="emTp" value="191" oninput="calcEm()"></div>
+<div class="inp"><label>Network/Day</label><input type="number" id="emNt" value="3600" oninput="calcEm()"></div>
+<div class="inp"><label>Miner %</label><input type="number" id="emMn" value="41" oninput="calcEm()"></div>
+</div>
+<div class="calc-r">
+<div class="calc-rl">Daily TAO</div>
+<div class="calc-rv" id="emDt" style="color:var(--cyan)">123.1τ</div>
+<div class="calc-rs" id="emDu">$23.5K/day</div>
+</div>
+<div class="mini">
+<div class="mini-i"><div class="mini-v" id="emMt">3,693τ</div><div class="mini-l">Monthly</div></div>
+<div class="mini-i"><div class="mini-v" id="emMu">$705K</div><div class="mini-l">Mo. USD</div></div>
+<div class="mini-i"><div class="mini-v" id="emAu">$8.6M</div><div class="mini-l">Annual</div></div>
+</div>
+</div>
+
+<div class="calc-c">
+<div class="calc-t">🎯 Composite Score</div>
+<div class="calc-d">F(20%) + P(25%) + E(30%) + D(20%) + C(5%)</div>
+<div class="calc-in">
+<div class="inp"><label>Rev Coverage %</label><input type="number" id="csRc" value="40" oninput="calcCS()"></div>
+<div class="inp"><label>Spec Premium %</label><input type="number" id="csSp" value="50" oninput="calcCS()"></div>
+<div class="inp"><label>Performance</label><input type="number" id="csPf" value="70" oninput="calcCS()"></div>
+<div class="inp"><label>Economics</label><input type="number" id="csEc" value="65" oninput="calcCS()"></div>
+<div class="inp"><label>Dev Activity</label><input type="number" id="csDv" value="75" oninput="calcCS()"></div>
+<div class="inp"><label>Decentralization</label><input type="number" id="csDc" value="50" oninput="calcCS()"></div>
+</div>
+<div class="calc-r">
+<div class="calc-rl">Score</div>
+<div class="calc-rv" id="csR" style="color:var(--green)">68</div>
+<div class="calc-rs" id="csS">Good • Low Risk</div>
+</div>
+</div>
+</div>
+
+<div class="meth">
+<div class="meth-t">📐 Methodology: Fundamental Value</div>
+<div class="meth-p"><strong>What is Fundamental Value?</strong><br>The Fundamental Value (FV) represents the intrinsic worth of a subnet token based on the operational costs it would take to replace the subnet's services.</div>
+<div class="meth-p"><strong>How it's calculated:</strong><br>FV = (Annual Operating Expenses ÷ 365) ÷ Daily Token Emissions<br><br>This divides the daily cost to run the subnet by the number of tokens emitted daily.</div>
+<div class="meth-f">Example: $4.2M OpEx/year ÷ 365 = $11,507/day ÷ 1,842 tokens = $6.25 FV per token</div>
+</div>
+</div>
+
+<div class="ftr">
+<div class="ftr-b"><strong>DeAI Nexus Live</strong> • Backend API Integration • Secure & Fast</div>
+<div class="ftr-m"><span id="footerTao">TAO -</span><span id="ts"></span></div>
+</div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
