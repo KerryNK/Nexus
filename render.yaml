@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: deai-nexus-backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && node server-enhanced.js
+    envVars:
+      - key: TAO_APP_API_KEY
+        sync: false
+      - key: TAOSTATS_API_KEY
+        sync: false
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
