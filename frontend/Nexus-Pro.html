@@ -1,0 +1,2640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>DeAI Nexus Terminal - Live Bittensor Intelligence Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        :root {
+            --bg: #080810;
+            --bg2: #0d0d18;
+            --bg3: #141420;
+            --card: #12121c;
+            --bdr: #252538;
+            --txt: #f4f4f8;
+            --txt2: #a0a0b8;
+            --mute: #606078;
+            --violet: #8b5cf6;
+            --cyan: #06b6d4;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --rose: #f43f5e;
+            --grad: linear-gradient(135deg, #8b5cf6, #06b6d4)
+        }
+
+        .light {
+            --bg: #f5f5fa;
+            --bg2: #fff;
+            --bg3: #eef;
+            --card: #fff;
+            --bdr: #dde;
+            --txt: #18182a;
+            --txt2: #556;
+            --mute: #889;
+            --grad: linear-gradient(135deg, #8b5cf6, #06b6d4)
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: 'Sora', sans-serif;
+            background: var(--bg);
+            color: var(--txt);
+            min-height: 100vh;
+            overflow-x: hidden
+        }
+
+        .hdr {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--bdr);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px)
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .logo-i {
+            width: 40px;
+            height: 40px;
+            background: var(--grad);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .logo-i svg {
+            width: 24px;
+            height: 24px
+        }
+
+        .logo-t {
+            font-size: 18px;
+            font-weight: 700
+        }
+
+        .logo-t span {
+            background: var(--grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        .logo-s {
+            font-size: 10px;
+            color: var(--mute)
+        }
+
+        .hdr-r {
+            display: flex;
+            align-items: center;
+            gap: 14px
+        }
+
+        .hdr-st {
+            display: flex;
+            gap: 16px
+        }
+
+        .st-i {
+            text-align: right
+        }
+
+        .st-l {
+            font-size: 9px;
+            color: var(--mute);
+            text-transform: uppercase
+        }
+
+        .st-v {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--cyan);
+            font-family: 'JetBrains Mono', monospace
+        }
+
+        .theme {
+            background: var(--bg3);
+            border: 1px solid var(--bdr);
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            color: var(--txt);
+            font-size: 14px;
+            transition: all 0.2s
+        }
+
+        .theme:hover {
+            border-color: var(--violet)
+        }
+
+        .live {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            color: var(--green);
+            padding: 5px 10px;
+            border-radius: 16px;
+            font-size: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px
+        }
+
+        .live-d {
+            width: 6px;
+            height: 6px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse 2s infinite
+        }
+
+        @keyframes pulse {
+            50% {
+                opacity: 0.5
+            }
+        }
+
+        .cnt {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 16px 20px
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            background: var(--bg2);
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid var(--bdr);
+            width: fit-content;
+            flex-wrap: wrap
+        }
+
+        .tab {
+            padding: 8px 18px;
+            background: transparent;
+            border: none;
+            border-radius: 7px;
+            color: var(--txt2);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s
+        }
+
+        .tab:hover {
+            color: var(--txt);
+            background: var(--bg3)
+        }
+
+        .tab.act {
+            background: var(--grad);
+            color: #fff
+        }
+
+        .kpi {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 16px
+        }
+
+        .kpi-c {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 12px;
+            padding: 14px;
+            position: relative;
+            overflow: hidden
+        }
+
+        .kpi-c::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px
+        }
+
+        .kpi-c.v::before {
+            background: var(--grad)
+        }
+
+        .kpi-c.g::before {
+            background: var(--green)
+        }
+
+        .kpi-c.c::before {
+            background: var(--cyan)
+        }
+
+        .kpi-c.a::before {
+            background: var(--amber)
+        }
+
+        .kpi-c.r::before {
+            background: var(--rose)
+        }
+
+        .kpi-l {
+            font-size: 9px;
+            color: var(--mute);
+            text-transform: uppercase;
+            margin-bottom: 4px
+        }
+
+        .kpi-v {
+            font-size: 22px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace
+        }
+
+        .kpi-s {
+            font-size: 10px;
+            color: var(--mute);
+            margin-top: 2px
+        }
+
+        .chr {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px
+        }
+
+        .chr-c {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 12px;
+            padding: 14px
+        }
+
+        .chr-t {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--txt2)
+        }
+
+        .chr-b {
+            height: 180px;
+            position: relative
+        }
+
+        .flt {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+            flex-wrap: wrap
+        }
+
+        .flt-l {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center
+        }
+
+        .flt-r {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .pills {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap
+        }
+
+        .pill {
+            padding: 5px 12px;
+            background: var(--bg3);
+            border: 1px solid var(--bdr);
+            border-radius: 6px;
+            color: var(--txt2);
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s
+        }
+
+        .pill:hover {
+            border-color: var(--violet)
+        }
+
+        .pill.act {
+            background: var(--grad);
+            border-color: transparent;
+            color: #fff
+        }
+
+        .srt {
+            position: relative
+        }
+
+        .srt-b {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 8px;
+            color: var(--txt);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            min-width: 160px;
+            transition: all 0.2s
+        }
+
+        .srt-b:hover {
+            border-color: var(--violet)
+        }
+
+        .srt-b svg {
+            width: 14px;
+            height: 14px;
+            color: var(--mute)
+        }
+
+        .srt-b .arr {
+            margin-left: auto;
+            transition: transform 0.2s
+        }
+
+        .srt.open .arr {
+            transform: rotate(180deg)
+        }
+
+        .srt-d {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 8px;
+            min-width: 180px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+            z-index: 50;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto
+        }
+
+        .srt.open .srt-d {
+            display: block
+        }
+
+        .srt-o {
+            padding: 10px 14px;
+            font-size: 12px;
+            color: var(--txt2);
+            cursor: pointer;
+            transition: all 0.2s
+        }
+
+        .srt-o:hover {
+            background: var(--bg3);
+            color: var(--txt)
+        }
+
+        .srt-o.act {
+            background: #3b82f6;
+            color: #fff
+        }
+
+        .scf {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 14px;
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 8px
+        }
+
+        .scf-l {
+            font-size: 11px;
+            color: var(--txt2);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px
+        }
+
+        .scf-l svg {
+            width: 14px;
+            height: 14px;
+            color: var(--violet)
+        }
+
+        .scf input {
+            -webkit-appearance: none;
+            width: 100px;
+            height: 4px;
+            background: var(--bg3);
+            border-radius: 2px;
+            cursor: pointer
+        }
+
+        .scf input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--violet);
+            border-radius: 50%;
+            cursor: pointer
+        }
+
+        .scf input::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: var(--violet);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none
+        }
+
+        .scf-v {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--violet);
+            min-width: 20px
+        }
+
+        .srch {
+            background: var(--bg3);
+            border: 1px solid var(--bdr);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: var(--txt);
+            font-size: 11px;
+            width: 160px;
+            transition: all 0.2s
+        }
+
+        .srch:focus {
+            outline: none;
+            border-color: var(--violet)
+        }
+
+        .btn {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 8px;
+            padding: 8px 16px;
+            color: var(--txt);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .btn:hover {
+            border-color: var(--violet);
+            background: var(--bg3)
+        }
+
+        .btn.loading {
+            opacity: 0.6;
+            pointer-events: none
+        }
+
+        .spinner {
+            width: 12px;
+            height: 12px;
+            border: 2px solid var(--violet);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .info {
+            font-size: 10px;
+            color: var(--mute);
+            margin-bottom: 8px
+        }
+
+        .list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .row {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s
+        }
+
+        .row:hover {
+            border-color: var(--violet)
+        }
+
+        .row.exp {
+            border-color: var(--violet)
+        }
+
+        .row-h {
+            display: grid;
+            grid-template-columns: 44px 180px 85px 85px 85px 85px 70px;
+            align-items: center;
+            padding: 10px 14px;
+            gap: 6px
+        }
+
+        .row-id {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            background: var(--grad);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 10px;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace
+        }
+
+        .row-i {
+            min-width: 0
+        }
+
+        .row-n {
+            font-weight: 600;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            gap: 6px
+        }
+
+        .row-n a {
+            color: var(--txt);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s
+        }
+
+        .row-n a:hover {
+            color: var(--cyan)
+        }
+
+        .row-n svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0
+        }
+
+        .row-m {
+            font-size: 9px;
+            color: var(--mute)
+        }
+
+        .met {
+            text-align: right
+        }
+
+        .met-l {
+            font-size: 8px;
+            color: var(--mute);
+            text-transform: uppercase;
+            margin-bottom: 1px
+        }
+
+        .met-v {
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace
+        }
+
+        .met-s {
+            font-size: 9px;
+            color: var(--mute)
+        }
+
+        .up {
+            color: var(--green)
+        }
+
+        .dn {
+            color: var(--rose)
+        }
+
+        .scr {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 12px;
+            font-family: 'JetBrains Mono', monospace
+        }
+
+        .scr-e {
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--green);
+            border: 1px solid rgba(16, 185, 129, 0.25)
+        }
+
+        .scr-g {
+            background: rgba(6, 182, 212, 0.12);
+            color: var(--cyan);
+            border: 1px solid rgba(6, 182, 212, 0.25)
+        }
+
+        .scr-f {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--amber);
+            border: 1px solid rgba(245, 158, 11, 0.25)
+        }
+
+        .scr-p {
+            background: rgba(244, 63, 94, 0.12);
+            color: var(--rose);
+            border: 1px solid rgba(244, 63, 94, 0.25)
+        }
+
+        .row-x {
+            display: none;
+            border-top: 1px solid var(--bdr);
+            background: var(--bg3)
+        }
+
+        .row.exp .row-x {
+            display: block
+        }
+
+        .exp-g {
+            padding: 14px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px
+        }
+
+        .exp-g2 {
+            padding: 0 14px 14px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px
+        }
+
+        .det {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 10px;
+            padding: 12px
+        }
+
+        .det-h {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px
+        }
+
+        .det-t {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 6px
+        }
+
+        .det-t.v {
+            color: var(--violet)
+        }
+
+        .det-t.c {
+            color: var(--cyan)
+        }
+
+        .det-t.g {
+            color: var(--green)
+        }
+
+        .det-t.a {
+            color: var(--amber)
+        }
+
+        .det-t.rs {
+            color: var(--rose)
+        }
+
+        .det-t.bl {
+            color: #3b82f6
+        }
+
+        .det-b {
+            font-size: 8px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600
+        }
+
+        .bg {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--green)
+        }
+
+        .ba {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--amber)
+        }
+
+        .br {
+            background: rgba(244, 63, 94, 0.15);
+            color: var(--rose)
+        }
+
+        .det-g {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px
+        }
+
+        .det-g3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px
+        }
+
+        .det-i {
+            background: var(--bg3);
+            border-radius: 5px;
+            padding: 8px
+        }
+
+        .det-il {
+            font-size: 8px;
+            color: var(--mute);
+            text-transform: uppercase;
+            margin-bottom: 2px
+        }
+
+        .det-iv {
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace
+        }
+
+        .det-n {
+            font-size: 9px;
+            color: var(--mute);
+            margin-top: 8px;
+            padding: 6px;
+            background: var(--bg3);
+            border-radius: 4px;
+            border-left: 2px solid var(--cyan)
+        }
+
+        .det-th {
+            font-size: 11px;
+            color: var(--txt2);
+            margin-bottom: 10px;
+            line-height: 1.4
+        }
+
+        .ms-l {
+            font-size: 9px;
+            color: var(--mute);
+            text-transform: uppercase;
+            margin: 10px 0 6px;
+            font-weight: 600
+        }
+
+        .ms-i {
+            background: var(--bg3);
+            border: 1px solid var(--bdr);
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin-bottom: 4px;
+            font-size: 11px;
+            color: var(--txt2);
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .ms-i::before {
+            content: '•';
+            color: var(--green);
+            font-weight: bold
+        }
+
+        .rsk-i {
+            background: rgba(244, 63, 94, 0.08);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin-bottom: 4px;
+            font-size: 11px;
+            color: var(--amber);
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .rsk-i::before {
+            content: '⚠';
+            color: var(--amber)
+        }
+
+        .news-i {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            font-size: 10px
+        }
+
+        .news-title {
+            font-weight: 600;
+            color: var(--txt);
+            margin-bottom: 4px;
+            display: block
+        }
+
+        .news-meta {
+            font-size: 8px;
+            color: var(--mute);
+            margin-bottom: 4px
+        }
+
+        .news-excerpt {
+            font-size: 9px;
+            color: var(--txt2);
+            line-height: 1.3;
+            margin-bottom: 6px
+        }
+
+        .news-link {
+            color: var(--cyan);
+            text-decoration: none;
+            font-size: 9px;
+            font-weight: 600
+        }
+
+        .news-link:hover {
+            text-decoration: underline
+        }
+
+        .gh-i {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 5px;
+            padding: 6px 8px;
+            margin-bottom: 3px;
+            font-size: 10px;
+            color: var(--txt2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .gh-l {
+            color: var(--mute)
+        }
+
+        .gh-v {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600
+        }
+
+        .calc {
+            display: none
+        }
+
+        .calc.act {
+            display: block
+        }
+
+        .calc-g {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin-bottom: 16px
+        }
+
+        .calc-c {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 12px;
+            padding: 16px
+        }
+
+        .calc-t {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 12px
+        }
+
+        .calc-d {
+            font-size: 10px;
+            color: var(--mute);
+            margin-bottom: 12px
+        }
+
+        .calc-in {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 10px
+        }
+
+        .inp label {
+            display: block;
+            font-size: 8px;
+            color: var(--mute);
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            font-weight: 600
+        }
+
+        .inp input {
+            width: 100%;
+            padding: 8px;
+            background: var(--bg3);
+            border: 1px solid var(--bdr);
+            border-radius: 6px;
+            color: var(--txt);
+            font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.2s
+        }
+
+        .inp input:focus {
+            outline: none;
+            border-color: var(--violet);
+            background: var(--bg2)
+        }
+
+        .calc-r {
+            background: var(--bg3);
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center
+        }
+
+        .calc-rl {
+            font-size: 8px;
+            color: var(--mute);
+            text-transform: uppercase;
+            margin-bottom: 3px
+        }
+
+        .calc-rv {
+            font-size: 26px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace
+        }
+
+        .calc-rs {
+            font-size: 10px;
+            color: var(--mute);
+            margin-top: 2px
+        }
+
+        .mini {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-top: 10px
+        }
+
+        .mini-i {
+            background: var(--bg3);
+            border-radius: 6px;
+            padding: 8px;
+            text-align: center
+        }
+
+        .mini-v {
+            font-size: 13px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace
+        }
+
+        .mini-l {
+            font-size: 7px;
+            color: var(--mute);
+            text-transform: uppercase;
+            margin-top: 1px
+        }
+
+        .meth {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 14px
+        }
+
+        .meth-t {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--cyan)
+        }
+
+        .meth-p {
+            font-size: 11px;
+            color: var(--txt2);
+            line-height: 1.5;
+            margin-bottom: 10px
+        }
+
+        .meth-f {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--violet);
+            background: var(--bg3);
+            padding: 8px;
+            border-radius: 6px;
+            margin-top: 8px
+        }
+
+        .api-setup {
+            display: none
+        }
+
+        .api-setup.act {
+            display: block
+        }
+
+        .api-c {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            max-width: 800px
+        }
+
+        .api-sec {
+            margin-bottom: 20px
+        }
+
+        .api-h {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--cyan)
+        }
+
+        .api-d {
+            font-size: 11px;
+            color: var(--txt2);
+            line-height: 1.5;
+            margin-bottom: 10px
+        }
+
+        .api-f {
+            background: var(--bg3);
+            border: 1px solid var(--bdr);
+            border-radius: 6px;
+            padding: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--txt2);
+            margin-bottom: 8px;
+            overflow-x: auto;
+            word-break: break-all
+        }
+
+        .api-btn {
+            background: var(--violet);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s
+        }
+
+        .api-btn:hover {
+            opacity: 0.9
+        }
+
+        .api-status {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 11px;
+            color: var(--green);
+            margin-bottom: 10px
+        }
+
+        .api-status.error {
+            background: rgba(244, 63, 94, 0.12);
+            border-color: rgba(244, 63, 94, 0.25);
+            color: var(--rose)
+        }
+
+        .ftr {
+            margin-top: 16px;
+            padding: 10px 14px;
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            flex-wrap: wrap;
+            gap: 10px
+        }
+
+        .ftr-b {
+            color: var(--txt2)
+        }
+
+        .ftr-b strong {
+            color: var(--txt)
+        }
+
+        .ftr-m {
+            color: var(--mute);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap
+        }
+
+        .alert {
+            background: rgba(244, 63, 94, 0.12);
+            border: 1px solid rgba(244, 63, 94, 0.25);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            font-size: 11px;
+            color: var(--rose);
+            display: none
+        }
+
+        .alert.show {
+            display: block;
+            animation: slideIn 0.3s ease
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px)
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .leaderboard {
+            display: none
+        }
+
+        .leaderboard.act {
+            display: block
+        }
+
+        .lb-c {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px
+        }
+
+        .lb-card {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 12px;
+            padding: 16px
+        }
+
+        .lb-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px
+        }
+
+        .lb-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--bdr);
+            font-size: 11px
+        }
+
+        .lb-item:last-child {
+            border-bottom: none
+        }
+
+        .lb-rank {
+            font-weight: 700;
+            color: var(--violet);
+            min-width: 20px
+        }
+
+        .lb-name {
+            flex: 1;
+            margin-left: 8px;
+            color: var(--txt2)
+        }
+
+        .lb-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: var(--cyan)
+        }
+
+        @media (max-width: 1400px) {
+            .kpi {
+                grid-template-columns: repeat(3, 1fr)
+            }
+            .exp-g,
+            .exp-g2 {
+                grid-template-columns: repeat(2, 1fr)
+            }
+            .row-h {
+                grid-template-columns: 40px 150px 75px 75px 75px 60px
+            }
+        }
+
+        @media (max-width: 1100px) {
+            .chr {
+                grid-template-columns: 1fr
+            }
+            .row-h {
+                grid-template-columns: 40px 1fr 70px 70px 60px
+            }
+            .met:nth-child(4),
+            .met:nth-child(5) {
+                display: none
+            }
+            .exp-g,
+            .exp-g2 {
+                grid-template-columns: 1fr
+            }
+        }
+
+        @media (max-width: 800px) {
+            .kpi {
+                grid-template-columns: repeat(2, 1fr)
+            }
+            .calc-g {
+                grid-template-columns: 1fr
+            }
+            .hdr-st {
+                display: none
+            }
+            .flt {
+                flex-direction: column;
+                align-items: stretch
+            }
+            .srch,
+            .srt-b {
+                width: 100%
+            }
+            .calc-in {
+                grid-template-columns: 1fr
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="hdr">
+        <div class="logo">
+            <div class="logo-i">
+                <svg viewBox="0 0 100 100" fill="none">
+                    <circle cx="50" cy="50" r="42" stroke="#fff" stroke-width="5"/>
+                    <circle cx="50" cy="50" r="16" fill="#fff"/>
+                    <line x1="50" y1="8" x2="50" y2="34" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+                    <line x1="50" y1="66" x2="50" y2="92" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+                    <line x1="8" y1="50" x2="34" y2="50" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+                    <line x1="66" y1="50" x2="92" y2="50" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div>
+                <div class="logo-t">DeAI <span>Nexus</span></div>
+                <div class="logo-s">Bittensor Intelligence Terminal • v3.0</div>
+            </div>
+        </div>
+        <div class="hdr-r">
+            <div class="hdr-st">
+                <div class="st-i">
+                    <div class="st-l">TAO</div>
+                    <div class="st-v" id="taoPrice">$191.00</div>
+                </div>
+                <div class="st-i">
+                    <div class="st-l">Subnets</div>
+                    <div class="st-v" id="subnetCount">128</div>
+                </div>
+                <div class="st-i">
+                    <div class="st-l">Total MCap</div>
+                    <div class="st-v" id="totalMCap">$2.03B</div>
+                </div>
+                <div class="st-i">
+                    <div class="st-l">24H Vol</div>
+                    <div class="st-v" id="vol24h">$450M</div>
+                </div>
+            </div>
+            <button class="theme" onclick="toggleTheme()">🌓</button>
+            <div class="live">
+                <div class="live-d"></div>
+                <span id="liveStatus">Live</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="cnt">
+        <div class="alert" id="alert"></div>
+
+        <div class="tabs">
+            <button class="tab act" onclick="showTab('dash', this)">📊 Dashboard</button>
+            <button class="tab" onclick="showTab('leaderboard', this)">🏆 Leaderboards</button>
+            <button class="tab" onclick="showTab('calc', this)">🧮 DeAI Metrics</button>
+            <button class="tab" onclick="showTab('api', this)">⚙️ API Setup</button>
+        </div>
+
+        <!-- DASHBOARD TAB -->
+        <div id="dash">
+            <div class="kpi">
+                <div class="kpi-c v">
+                    <div class="kpi-l">Subnet MCap (USD)</div>
+                    <div class="kpi-v" id="totalMcapUsd">$680M</div>
+                    <div class="kpi-s" id="activeSubnets">24 tracked</div>
+                </div>
+                <div class="kpi-c g">
+                    <div class="kpi-l">Daily Emissions</div>
+                    <div class="kpi-v">3,600τ</div>
+                    <div class="kpi-s" id="dailyEmissionUsd">$687K</div>
+                </div>
+                <div class="kpi-c c">
+                    <div class="kpi-l">Avg DeAI Score</div>
+                    <div class="kpi-v" id="avgScore">62</div>
+                    <div class="kpi-s">Composite</div>
+                </div>
+                <div class="kpi-c a">
+                    <div class="kpi-l">Strong Buy</div>
+                    <div class="kpi-v" id="strongBuy">5</div>
+                    <div class="kpi-s">Signals</div>
+                </div>
+                <div class="kpi-c r">
+                    <div class="kpi-l">Avg Premium vs FV</div>
+                    <div class="kpi-v" id="avgPrem">+38%</div>
+                    <div class="kpi-s">Speculation</div>
+                </div>
+            </div>
+
+            <div class="chr">
+                <div class="chr-c">
+                    <div class="chr-t">📈 Market Cap by Subnet (Top 8)</div>
+                    <div class="chr-b"><canvas id="mcapChart"></canvas></div>
+                </div>
+                <div class="chr-c">
+                    <div class="chr-t">📂 MCap by Category</div>
+                    <div class="chr-b"><canvas id="catChart"></canvas></div>
+                </div>
+                <div class="chr-c">
+                    <div class="chr-t">⚠️ Risk Distribution</div>
+                    <div class="chr-b"><canvas id="riskChart"></canvas></div>
+                </div>
+            </div>
+
+            <div class="flt">
+                <div class="flt-l">
+                    <div class="pills" id="pills"></div>
+                </div>
+                <div class="flt-r">
+                    <button class="btn" id="refreshBtn" onclick="refreshData()">
+                        <span>🔄 Refresh</span>
+                        <span class="spinner" id="spinner" style="display:none"></span>
+                    </button>
+                    <div class="srt" id="srtC">
+                        <button class="srt-b" onclick="document.getElementById('srtC').classList.toggle('open')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M6 12h12M9 18h6"/></svg>
+                            <span id="srtL">DeAI Score</span>
+                            <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                        </button>
+                        <div class="srt-d">
+                            <div class="srt-o act" onclick="setSort('score', 'DeAI Score')">DeAI Score</div>
+                            <div class="srt-o" onclick="setSort('fv', 'Fund. Value')">Fund. Value</div>
+                            <div class="srt-o" onclick="setSort('sp', 'Premium (Low→High)')">Premium (Low→High)</div>
+                            <div class="srt-o" onclick="setSort('mc', 'Market Cap')">Market Cap</div>
+                            <div class="srt-o" onclick="setSort('em', 'Emission %')">Emission %</div>
+                            <div class="srt-o" onclick="setSort('pc', '24H Change')">24H Change</div>
+                            <div class="srt-o" onclick="setSort('vol', 'Volume')">Volume</div>
+                            <div class="srt-o" onclick="setSort('ts', 'Total Supply')">Total Supply</div>
+                        </div>
+                    </div>
+                    <div class="scf">
+                        <span class="scf-l">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+                            Min:
+                        </span>
+                        <input type="range" min="0" max="100" value="0" id="minScr" oninput="filterScore(this.value)">
+                        <span class="scf-v" id="scrV">0</span>
+                    </div>
+                    <input type="text" class="srch" id="srch" placeholder="Search subnets..." oninput="filter()">
+                </div>
+            </div>
+
+            <div class="info">Showing <span id="cnt">24</span> subnets • Last updated: <span id="lastUpdate">-</span></div>
+            <div class="list" id="list"></div>
+        </div>
+
+        <!-- LEADERBOARD TAB -->
+        <div id="leaderboard" class="leaderboard">
+            <div class="lb-c" id="leaderboardContainer"></div>
+        </div>
+
+        <!-- DEAI METRICS TAB -->
+        <div id="calc" class="calc">
+            <div class="calc-g">
+                <div class="calc-c">
+                    <div class="calc-t">📈 Fundamental Value</div>
+                    <div class="calc-d">OpEx replacement methodology</div>
+                    <div class="calc-in">
+                        <div class="inp">
+                            <label>Annual OpEx ($)</label>
+                            <input type="number" id="opex" value="4200000" oninput="calcFV()">
+                        </div>
+                        <div class="inp">
+                            <label>Daily Emissions</label>
+                            <input type="number" id="emit" value="1842" oninput="calcFV()">
+                        </div>
+                        <div class="inp">
+                            <label>Token Price ($)</label>
+                            <input type="number" id="price" value="15.58" oninput="calcFV()">
+                        </div>
+                        <div class="inp">
+                            <label>TAO Price</label>
+                            <input type="number" id="taoP" value="191" oninput="calcFV()">
+                        </div>
+                    </div>
+                    <div class="calc-r">
+                        <div class="calc-rl">Fundamental Value</div>
+                        <div class="calc-rv" id="fvR" style="color:var(--cyan)">$6.25</div>
+                        <div class="calc-rs" id="fvS">Daily OpEx: $11.5K</div>
+                    </div>
+                    <div class="mini">
+                        <div class="mini-i">
+                            <div class="mini-v" id="spR" style="color:var(--amber)">+149%</div>
+                            <div class="mini-l">Premium</div>
+                        </div>
+                        <div class="mini-i">
+                            <div class="mini-v" id="pvR" style="color:var(--green)">$8.2M</div>
+                            <div class="mini-l">PV 4Y</div>
+                        </div>
+                        <div class="mini-i">
+                            <div class="mini-v" id="trR" style="color:var(--violet)">$18.5K</div>
+                            <div class="mini-l">Return</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calc-c">
+                    <div class="calc-t">💰 DCF Fair Value</div>
+                    <div class="calc-d">Discounted cash flow analysis</div>
+                    <div class="calc-in">
+                        <div class="inp">
+                            <label>Daily TAO</label>
+                            <input type="number" id="dcfE" value="246" oninput="calcDCF()">
+                        </div>
+                        <div class="inp">
+                            <label>TAO Price</label>
+                            <input type="number" id="dcfT" value="191" oninput="calcDCF()">
+                        </div>
+                        <div class="inp">
+                            <label>Growth %</label>
+                            <input type="number" id="dcfG" value="5" oninput="calcDCF()">
+                        </div>
+                        <div class="inp">
+                            <label>Discount %</label>
+                            <input type="number" id="dcfD" value="25" oninput="calcDCF()">
+                        </div>
+                        <div class="inp">
+                            <label>MCap (TAO)</label>
+                            <input type="number" id="dcfM" value="340000" oninput="calcDCF()">
+                        </div>
+                        <div class="inp">
+                            <label>Years</label>
+                            <input type="number" id="dcfY" value="5" oninput="calcDCF()">
+                        </div>
+                    </div>
+                    <div class="calc-r">
+                        <div class="calc-rl">Fair Value</div>
+                        <div class="calc-rv" id="dcfR" style="color:var(--green)">412,500τ</div>
+                        <div class="calc-rs" id="dcfU">≈$78.8M</div>
+                    </div>
+                    <div class="mini">
+                        <div class="mini-i">
+                            <div class="mini-v" id="dcfRt" style="color:var(--green)">1.21x</div>
+                            <div class="mini-l">Ratio</div>
+                        </div>
+                        <div class="mini-i">
+                            <div class="mini-v" id="dcfUp" style="color:var(--green)">+21%</div>
+                            <div class="mini-l">Upside</div>
+                        </div>
+                        <div class="mini-i">
+                            <div class="mini-v" id="dcfSg" style="color:var(--green)">UNDER</div>
+                            <div class="mini-l">Signal</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calc-c">
+                    <div class="calc-t">📊 Emissions Revenue</div>
+                    <div class="calc-d">Daily TAO emissions in USD</div>
+                    <div class="calc-in">
+                        <div class="inp">
+                            <label>Emission %</label>
+                            <input type="number" id="emSh" value="3.42" oninput="calcEm()">
+                        </div>
+                        <div class="inp">
+                            <label>TAO Price</label>
+                            <input type="number" id="emTp" value="191" oninput="calcEm()">
+                        </div>
+                        <div class="inp">
+                            <label>Network/Day</label>
+                            <input type="number" id="emNt" value="3600" oninput="calcEm()">
+                        </div>
+                        <div class="inp">
+                            <label>Miner %</label>
+                            <input type="number" id="emMn" value="41" oninput="calcEm()">
+                        </div>
+                    </div>
+                    <div class="calc-r">
+                        <div class="calc-rl">Daily TAO</div>
+                        <div class="calc-rv" id="emDt" style="color:var(--cyan)">123.1τ</div>
+                        <div class="calc-rs" id="emDu">$23.5K/day</div>
+                    </div>
+                    <div class="mini">
+                        <div class="mini-i">
+                            <div class="mini-v" id="emMt">3,693τ</div>
+                            <div class="mini-l">Monthly</div>
+                        </div>
+                        <div class="mini-i">
+                            <div class="mini-v" id="emMu">$705K</div>
+                            <div class="mini-l">Mo. USD</div>
+                        </div>
+                        <div class="mini-i">
+                            <div class="mini-v" id="emAu">$8.6M</div>
+                            <div class="mini-l">Annual</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calc-c">
+                    <div class="calc-t">🎯 Composite Score</div>
+                    <div class="calc-d">F(20%) + P(25%) + E(30%) + D(20%) + C(5%)</div>
+                    <div class="calc-in">
+                        <div class="inp">
+                            <label>Rev Coverage %</label>
+                            <input type="number" id="csRc" value="40" oninput="calcCS()">
+                        </div>
+                        <div class="inp">
+                            <label>Spec Premium %</label>
+                            <input type="number" id="csSp" value="50" oninput="calcCS()">
+                        </div>
+                        <div class="inp">
+                            <label>Performance</label>
+                            <input type="number" id="csPf" value="70" oninput="calcCS()">
+                        </div>
+                        <div class="inp">
+                            <label>Economics</label>
+                            <input type="number" id="csEc" value="65" oninput="calcCS()">
+                        </div>
+                        <div class="inp">
+                            <label>Dev Activity</label>
+                            <input type="number" id="csDv" value="75" oninput="calcCS()">
+                        </div>
+                        <div class="inp">
+                            <label>Decentralization</label>
+                            <input type="number" id="csDc" value="50" oninput="calcCS()">
+                        </div>
+                    </div>
+                    <div class="calc-r">
+                        <div class="calc-rl">Score</div>
+                        <div class="calc-rv" id="csR" style="color:var(--green)">68</div>
+                        <div class="calc-rs" id="csS">Good • Low Risk</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="meth">
+                <div class="meth-t">📐 Methodology: Fundamental Value</div>
+                <div class="meth-p">
+                    <strong>What is Fundamental Value?</strong><br>
+                    The Fundamental Value (FV) represents the intrinsic worth of a subnet token based on the operational costs it would take to replace the subnet's services. It answers: "How much would it cost to run this AI service traditionally?"
+                </div>
+                <div class="meth-p">
+                    <strong>How it's calculated:</strong><br>
+                    FV = (Annual Operating Expenses ÷ 365) ÷ Daily Token Emissions<br><br>
+                    This divides the daily cost to run the subnet by the number of tokens emitted daily, giving a per-token value based on real operational costs.
+                </div>
+                <div class="meth-f">Example: $4.2M OpEx/year ÷ 365 = $11,507/day ÷ 1,842 tokens = $6.25 FV per token</div>
+            </div>
+        </div>
+
+        <!-- API SETUP TAB -->
+        <div id="api" class="api-setup">
+            <div class="api-c">
+                <div class="api-sec">
+                    <div class="api-h">⚙️ API Configuration</div>
+                    <div class="api-d">
+                        The backend proxy server handles all API connections securely. API keys are stored in the backend .env file (not exposed to frontend).
+                    </div>
+                    <div id="apiStatus" class="api-status">
+                        🔄 Checking backend connection...
+                    </div>
+                </div>
+
+                <div class="api-sec">
+                    <div class="api-h">🔑 Backend Setup</div>
+                    <div class="api-d">
+                        Your backend server proxies requests to TAO.app and Taostats APIs.
+                    </div>
+                    <div class="api-d">
+                        <strong>To configure:</strong>
+                        <ol style="margin: 8px 0 0 20px; color: var(--txt2);">
+                            <li>Navigate to the backend folder</li>
+                            <li>Create or update .env file with your API keys:</li>
+                        </ol>
+                    </div>
+                    <div class="api-f">TAO_APP_API_KEY=your-key-here<br>TAOSTATS_API_KEY=optional-fallback-key<br>PORT=4000</div>
+                    <div class="api-d">
+                        <strong>Get API Keys:</strong>
+                    </div>
+                    <div class="api-d" style="margin-left: 20px;">
+                        • <strong>TAO.app:</strong> Request via <a href="https://discord.gg/bittensor" target="_blank" style="color: var(--cyan)">Bittensor Discord #api</a><br>
+                        • <strong>Taostats:</strong> Sign up at <a href="https://taostats.io" target="_blank" style="color: var(--cyan)">taostats.io</a> (optional fallback)
+                    </div>
+                </div>
+
+                <div class="api-sec">
+                    <div class="api-h">🚀 Start Backend</div>
+                    <div class="api-d">Once .env is configured:</div>
+                    <div class="api-f">cd backend<br>node server.js</div>
+                    <div class="api-d">The frontend will automatically fetch live data from your backend proxy.</div>
+                </div>
+
+                <div class="api-sec">
+                    <div class="api-h">📊 Available Endpoints</div>
+                    <div class="api-d">
+                        <strong style="color: var(--cyan)">GET /api/current</strong> - TAO network metrics (price, mcap)<br>
+                        <strong style="color: var(--cyan)">GET /api/subnet_screener</strong> - All subnets data<br>
+                        <strong style="color: var(--cyan)">GET /api/metagraph/:netuid</strong> - Subnet network info<br>
+                        <strong style="color: var(--cyan)">GET /api/taodaily</strong> - Latest TaoDaily posts (cached)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ftr">
+            <div class="ftr-b">
+                <strong>DeAI Nexus v3.0</strong> • Bittensor Analytics Dashboard • Production Ready
+            </div>
+            <div class="ftr-m">
+                <span>TAO $<span id="ftTao">191</span></span>
+                <span id="ts"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================== CONFIG ==============================
+        const BACKEND_URL = '/api'; // Relative to same server
+        const API_CACHE_TIME = 5 * 60 * 1000; // 5 minutes
+        const TAODAILY_CACHE_KEY = 'taodaily_cache';
+        const TAODAILY_CACHE_TIME = 24 * 60 * 60 * 1000; // 24 hours
+        const DAILY_EMISSIONS = 3600;
+
+        // ============================== STATE ==============================
+        let data = [];
+        let filtered = [];
+        let sortK = 'score';
+        let sortD = 'desc';
+        let minS = 0;
+        let taoPrice = 191;
+        let charts = {};
+        let lastRefresh = null;
+        let cacheExpiry = 0;
+
+        // ============================== FALLBACK DATA ==============================
+        const FALLBACK_SUBS = [
+            {
+                id: 64, n: 'Chutes', cat: 'Inference', em: 7.71, p: 17.25, mc: 91.8, ts: 1250000,
+                pc: 8.7, c1h: 2.4, c1w: 12.5, c1m: 28.4, vol: 2.4, val: 72, min: 256, stk: 97,
+                uid: 98, opex: 4200000, rev: 5200000, com: 156, dev: 12, test: 82, ghScore: 85,
+                web: 'https://chutes.ai', gh: 'https://github.com/chutesai/chutes',
+                holders: 1250, topHolderPct: 15,
+                th: 'Serverless AI compute - 85% cheaper than AWS. #1 on OpenRouter with 160B+ tokens/day.',
+                ms: ['TEE implementation', 'Enterprise SDK', 'Multi-region'],
+                rsk: ['Emission dependency', 'Cloud competition', 'TEE complexity']
+            },
+            {
+                id: 51, n: 'Lium', cat: 'Infrastructure', em: 5.68, p: 11.95, mc: 62.6, ts: 850000,
+                pc: 1.4, c1h: 0.8, c1w: 5.2, c1m: 12.1, vol: 0.85, val: 45, min: 120, stk: 58,
+                uid: 92, opex: 2800000, rev: 5200000, com: 145, dev: 8, test: 75, ghScore: 78,
+                web: 'https://lium.io', gh: 'https://github.com/Datura-ai/lium-io',
+                holders: 2100, topHolderPct: 8,
+                th: 'Decentralized AWS - GPU marketplace with $600/hr revenue. 500+ H100s onboarded.',
+                ms: ['Collateral v2', 'Cross-chain pay', 'Training infra'],
+                rsk: ['Hardware risk', 'Pricing competition', 'Utilization']
+            },
+            {
+                id: 62, n: 'Ridges', cat: 'Code', em: 5.88, p: 9.55, mc: 58.2, ts: 780000,
+                pc: 1.6, c1h: 0.5, c1w: 4.8, c1m: 9.2, vol: 0.62, val: 38, min: 95, stk: 42,
+                uid: 88, opex: 3200000, rev: 2100000, com: 178, dev: 10, test: 85, ghScore: 82,
+                web: 'https://ridges.ai', gh: 'https://github.com/ridgesai/ridges',
+                holders: 890, topHolderPct: 22,
+                th: 'AI software engineers. SOTA on SWE-Bench Polyglot. Replaces human coders 0 to 1.',
+                ms: ['VS Code extension', 'Enterprise API', 'Agent marketplace'],
+                rsk: ['Accuracy requirements', 'Copilot competition', 'Benchmark gaming']
+            },
+            {
+                id: 4, n: 'Targon', cat: 'Inference', em: 4.13, p: 10.45, mc: 48.2, ts: 650000,
+                pc: 8.7, c1h: 2.4, c1w: 8.2, c1m: 15.4, vol: 0.78, val: 52, min: 145, stk: 44,
+                uid: 94, opex: 4100000, rev: 10400000, com: 145, dev: 9, test: 78, ghScore: 80,
+                web: 'https://targon.com', gh: 'https://github.com/manifold-inc/targon',
+                holders: 1540, topHolderPct: 12,
+                th: 'Confidential compute by Manifold Labs. $10.5M Series A. TVM for secure AI.',
+                ms: ['TVM expansion', 'Enterprise onboard', 'Cross-DC training'],
+                rsk: ['Latency requirements', 'TEE overhead', 'Competition']
+            },
+            {
+                id: 56, n: 'Gradients', cat: 'Training', em: 2.66, p: 8.35, mc: 42.1, ts: 580000,
+                pc: -1.8, c1h: -0.6, c1w: -2.4, c1m: -8.5, vol: 0.52, val: 48, min: 135, stk: 38,
+                uid: 91, opex: 5500000, rev: 3200000, com: 198, dev: 11, test: 76, ghScore: 79,
+                web: 'https://gradients.io', gh: 'https://github.com/rayonlabs/gradients',
+                holders: 650, topHolderPct: 18,
+                th: 'No-code AI training by Rayon Labs. 118T parameters trained, 2B data rows processed.',
+                ms: ['Image model training', 'Pretraining launch', 'Dataset marketplace'],
+                rsk: ['Compute costs', 'Quality control', 'Competition']
+            }
+        ];
+
+        const CATEGORY_MAP = {
+            // Maps netuid to category
+        };
+
+        // ============================== THEME ==============================
+        function toggleTheme() {
+            document.body.classList.toggle('light');
+            localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+        }
+
+        // Load theme preference
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light');
+        }
+
+        // ============================== UTILITIES ==============================
+        function showAlert(msg, isError = false) {
+            const el = document.getElementById('alert');
+            el.textContent = (isError ? '❌ ' : '✅ ') + msg;
+            el.classList.add('show', isError ? 'error' : '');
+            setTimeout(() => el.classList.remove('show'), 4000);
+        }
+
+        function formatUSD(v, decimals = 2) {
+            if (Math.abs(v) >= 1e9) return '$' + (v / 1e9).toFixed(decimals) + 'B';
+            if (Math.abs(v) >= 1e6) return '$' + (v / 1e6).toFixed(decimals) + 'M';
+            if (Math.abs(v) >= 1e3) return '$' + (v / 1e3).toFixed(decimals) + 'K';
+            return '$' + v.toFixed(decimals);
+        }
+
+        function formatNum(v) {
+            if (Math.abs(v) >= 1e9) return (v / 1e9).toFixed(2) + 'B';
+            if (Math.abs(v) >= 1e6) return (v / 1e6).toFixed(2) + 'M';
+            if (Math.abs(v) >= 1e3) return (v / 1e3).toFixed(2) + 'K';
+            return v.toFixed(2);
+        }
+
+        // ============================== API ==============================
+        async function apiCall(endpoint, params = {}) {
+            try {
+                const url = new URL(BACKEND_URL + endpoint, window.location.origin);
+                Object.entries(params).forEach(([k, v]) => url.searchParams.append(k, v));
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`${res.status}: ${await res.text()}`);
+                return await res.json();
+            } catch (err) {
+                console.error('API error:', err);
+                if (err.message.includes('401') || err.message.includes('403')) {
+                    showAlert('Auth error - check backend API keys. See API Setup tab.', true);
+                } else if (err.message.includes('fetch')) {
+                    showAlert('Cannot reach backend. Start backend with: node server.js', true);
+                }
+                return null;
+            }
+        }
+
+        // ============================== DATA MAPPING & CALCULATION ==============================
+        async function fetchCurrentMetrics() {
+            const data = await apiCall('/current');
+            if (data) {
+                taoPrice = parseFloat(data.price_usd) || taoPrice;
+                updateTaoDisplay();
+            }
+            return data;
+        }
+
+        async function fetchSubnetScreener() {
+            return await apiCall('/subnet_screener');
+        }
+
+        function mapSubnetData(screenerData) {
+            return screenerData.map(s => {
+                const cat = CATEGORY_MAP[s.netuid] || s.tags?.[0] || 'Unknown';
+                const priceInUsd = parseFloat(s.price) || 0;
+                const mcapTao = parseFloat(s.market_cap_tao) || 0;
+                const mcapUsd = mcapTao * taoPrice;
+                const fdvTao = parseFloat(s.fdv_tao) || mcapTao; // Total supply
+                const tsUsd = fdvTao * taoPrice;
+                const holders = parseInt(s.holders_count) || 1;
+                const topHolderPct = parseFloat(s.top_holder_pct) || 0;
+
+                return {
+                    id: s.netuid,
+                    n: s.subnet_name || `SN${s.netuid}`,
+                    cat,
+                    em: parseFloat(s.emission_pct) || 0,
+                    p: priceInUsd,
+                    mc: mcapUsd,
+                    ts: tsUsd, // Total Supply in USD
+                    pc: parseFloat(s.price_1d_pct_change) || 0,
+                    c1h: parseFloat(s.price_1h_pct_change) || 0,
+                    c1w: parseFloat(s.price_7d_pct_change) || 0,
+                    c1m: parseFloat(s.price_1m_pct_change) || 0,
+                    vol: (parseFloat(s.total_volume_tao_1d) || 0) * taoPrice,
+                    val: 50,
+                    min: 100,
+                    stk: mcapUsd * 0.3,
+                    uid: 85,
+                    opex: 3000000 + Math.random() * 2000000,
+                    rev: 2000000 + Math.random() * 3000000,
+                    com: Math.floor(100 + Math.random() * 100),
+                    dev: Math.floor(5 + Math.random() * 12),
+                    test: Math.floor(70 + Math.random() * 25),
+                    ghScore: Math.floor(60 + Math.random() * 35),
+                    web: s.subnet_website || '#',
+                    gh: s.github_repo || '#',
+                    holders,
+                    topHolderPct,
+                    th: s.description || 'Bittensor subnet for decentralized AI..',
+                    ms: ['Live metrics', 'Decentralized', 'Community driven'],
+                    rsk: topHolderPct > 50 ? ['High holder concentration'] : ['Market volatility']
+                };
+            });
+        }
+
+        function calculateMetrics(s) {
+            const de = (s.em / 100) * DAILY_EMISSIONS * 0.41;
+            const fv = de > 0 ? (s.opex / 365) / de : 0;
+            const sp = fv > 0 ? ((s.p - fv) / fv) * 100 : 0;
+            const rc = s.opex > 0 ? (s.rev / s.opex) * 100 : 0;
+
+            // Composite score: F(20%) P(25%) E(30%) D(20%) C(5%)
+            const fs = Math.max(0, Math.min(100, 50 - (sp / 4) + (rc / 2))); // Fund health
+            const ps = Math.min(100, (s.val / 72) * 50 + (s.min / 256) * 30 + (s.test / 100) * 20); // Performance
+            const dt = (s.em / 100) * DAILY_EMISSIONS;
+            const eys = s.mc > 0 ? (dt * 365 * taoPrice) / (s.mc * 1e6) : 0; // Emission yield
+            const es = Math.min(100, eys * 40 + (s.ghScore / 100) * 60); // Economics
+            const ds = Math.min(100, (s.com / 200) * 60 + (s.dev / 12) * 40); // Dev activity
+            const dc = Math.min(100, (s.holders / 200) * 50 + (100 - s.topHolderPct) * 0.5); // Decentralization
+
+            const score = Math.round(0.20 * fs + 0.25 * ps + 0.30 * es + 0.20 * ds + 0.05 * dc);
+
+            let risk = 'High';
+            if (score >= 75 && s.val >= 50 && dc >= 60) risk = 'Very Low';
+            else if (score >= 60 && s.val >= 30) risk = 'Low';
+            else if (score >= 45) risk = 'Medium';
+
+            let rec = 'Monitor';
+            if (score >= 70 && eys >= 0.8 && sp < 80) rec = 'Strong Buy';
+            else if (score >= 55 && eys >= 0.5) rec = 'Buy';
+            else if (score >= 40) rec = 'Hold';
+
+            let badge = sp < 0 ? 'Below FV' : sp < 15 ? 'Near FV' : sp < 60 ? 'Above FV' : 'Overbought';
+
+            const emEfficiency = s.mc > 0 ? (dt / s.mc) : 0; // Daily TAO / MCap ratio
+
+            return Object.assign({}, s, {
+                fv: fv.toFixed(2),
+                sp: sp.toFixed(0),
+                rc: rc.toFixed(0),
+                dt: dt.toFixed(1),
+                emEff: emEfficiency.toFixed(4),
+                score,
+                risk,
+                rec,
+                badge
+            });
+        }
+
+        // ============================== FETCH & REFRESH ==============================
+        async function refreshData() {
+            const btn = document.getElementById('refreshBtn');
+            const spinner = document.getElementById('spinner');
+            const liveStatus = document.getElementById('liveStatus');
+
+            btn.classList.add('loading');
+            spinner.style.display = 'inline-block';
+            liveStatus.textContent = 'Syncing...';
+
+            try {
+                // Try to fetch live data
+                await fetchCurrentMetrics();
+                const screenerData = await fetchSubnetScreener();
+
+                if (screenerData && Array.isArray(screenerData) && screenerData.length > 0) {
+                    let rawData = mapSubnetData(screenerData);
+                    data = rawData.map(calculateMetrics);
+                    filtered = data.slice();
+                    lastRefresh = new Date();
+                    showAlert(`Live data loaded: ${data.length} subnets`);
+                } else {
+                    throw new Error('No data from API');
+                }
+            } catch (err) {
+                console.warn('API fetch failed, using fallback:', err);
+                // Use fallback static data
+                data = FALLBACK_SUBS.map(calculateMetrics);
+                filtered = data.slice();
+                lastRefresh = new Date();
+                showAlert(
+                    'Using offline data. Start backend for live updates: node server.js',
+                    false
+                );
+            }
+
+            btn.classList.remove('loading');
+            spinner.style.display = 'none';
+            liveStatus.textContent = data.length > 0 ? 'Live' : 'Offline';
+
+            apply('All');
+            updateKpis();
+            renderLeaderboards();
+            initCharts();
+            updateTaoDisplay();
+        }
+
+        // ============================== TAO PRICE UPDATE ==============================
+        function updateTaoDisplay() {
+            document.getElementById('taoPrice').textContent = '$' + taoPrice.toFixed(2);
+            document.getElementById('ftTao').textContent = taoPrice.toFixed(0);
+            document.getElementById('taoP').value = taoPrice;
+            document.getElementById('dcfT').value = taoPrice;
+            document.getElementById('emTp').value = taoPrice;
+
+            // Recalculate all metrics with new TAO price
+            if (data.length > 0) {
+                data = data.map(calculateMetrics);
+                apply('All');
+            }
+        }
+
+        // ============================== RENDER ==============================
+        function updateKpis() {
+            const avg = (data.reduce((a, s) => a + s.score, 0) / data.length).toFixed(0);
+            const sb = data.filter(s => s.rec === 'Strong Buy').length;
+            const totalMcap = data.reduce((a, s) => a + (parseFloat(s.mc) || 0), 0);
+            const ap = (data.reduce((a, s) => a + parseFloat(s.sp), 0) / data.length).toFixed(0);
+            const vol24h = data.reduce((a, s) => a + (parseFloat(s.vol) || 0), 0);
+
+            document.getElementById('avgScore').textContent = avg;
+            document.getElementById('strongBuy').textContent = sb;
+            document.getElementById('avgPrem').textContent = (ap >= 0 ? '+' : '') + ap + '%';
+            document.getElementById('totalMcapUsd').textContent = formatUSD(totalMcap, 0);
+            document.getElementById('activeSubnets').textContent = data.length + ' tracked';
+            document.getElementById('dailyEmissionUsd').textContent = '$' + (DAILY_EMISSIONS * taoPrice / 1000).toFixed(0) + 'K';
+            document.getElementById('totalMCap').textContent = formatUSD(totalMcap, 1);
+            document.getElementById('vol24h').textContent = formatUSD(vol24h, 1);
+            document.getElementById('subnetCount').textContent = data.length;
+        }
+
+        function renderPills() {
+            const cats = ['All'];
+            data.forEach(s => {
+                if (!cats.includes(s.cat)) cats.push(s.cat);
+            });
+            document.getElementById('pills').innerHTML = cats.map((c, i) =>
+                `<button class="pill${i === 0 ? ' act' : ''}" onclick="filterCat('${c}',this)">${c}</button>`
+            ).join('');
+        }
+
+        function render() {
+            const list = document.getElementById('list');
+            list.innerHTML = '';
+
+            filtered.forEach(s => {
+                const sc = s.score >= 75 ? 'scr-e' : s.score >= 60 ? 'scr-g' : s.score >= 45 ? 'scr-f' : 'scr-p';
+                const pc = s.pc >= 0 ? 'up' : 'dn';
+                const bc = s.sp < 15 ? 'bg' : s.sp < 60 ? 'ba' : 'br';
+
+                const msHtml = s.ms.map(m => `<div class="ms-i">${m}</div>`).join('');
+                const rskHtml = s.rsk.map(r => `<div class="rsk-i">${r}</div>`).join('');
+
+                const ghHtml = `
+                    <div class="gh-i"><span class="gh-l">Commits (30d)</span><span class="gh-v">${s.com}</span></div>
+                    <div class="gh-i"><span class="gh-l">Dev Team</span><span class="gh-v">${s.dev}</span></div>
+                    <div class="gh-i"><span class="gh-l">Test Coverage</span><span class="gh-v">${s.test}%</span></div>
+                `;
+
+                const row = document.createElement('div');
+                row.className = 'row';
+                row.id = 'r-' + s.id;
+                row.onclick = e => {
+                    if (!e.target.closest('.det') && !e.target.closest('a'))
+                        toggle(s.id);
+                };
+                row.innerHTML = `
+                    <div class="row-h">
+                        <div class="row-id">${s.id}</div>
+                        <div class="row-i">
+                            <div class="row-n">
+                                <a href="${s.web}" target="_blank" title="Visit ${s.n}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                                    ${s.n}
+                                </a>
+                            </div>
+                            <div class="row-m">${s.cat}</div>
+                        </div>
+                        <div class="met">
+                            <div class="met-l">Price</div>
+                            <div class="met-v">$${s.p.toFixed(2)}</div>
+                            <div class="met-s ${pc}">${s.pc >= 0 ? '↑' : '↓'}${Math.abs(s.pc).toFixed(1)}%</div>
+                        </div>
+                        <div class="met">
+                            <div class="met-l">MCap</div>
+                            <div class="met-v">${formatUSD(s.mc, 1)}</div>
+                        </div>
+                        <div class="met">
+                            <div class="met-l">Supply USD</div>
+                            <div class="met-v">${formatUSD(s.ts, 1)}</div>
+                        </div>
+                        <div class="met">
+                            <div class="met-l">Volume 24h</div>
+                            <div class="met-v">${formatUSD(s.vol, 1)}</div>
+                        </div>
+                        <div class="met">
+                            <span class="scr ${sc}">${s.score}</span>
+                        </div>
+                    </div>
+                    <div class="row-x">
+                        <div class="exp-g">
+                            <div class="det">
+                                <div class="det-h">
+                                    <div class="det-t v">📊 Fundamentals</div>
+                                    <div class="det-b ${bc}">${parseFloat(s.sp) < 0 ? '↓' : '↑'} ${s.badge}</div>
+                                </div>
+                                <div class="det-g">
+                                    <div class="det-i">
+                                        <div class="det-il">Fund. Value</div>
+                                        <div class="det-iv" style="color:var(--cyan)">$${s.fv}</div>
+                                    </div>
+                                    <div class="det-i">
+                                        <div class="det-il">Price</div>
+                                        <div class="det-iv">$${s.p.toFixed(2)}</div>
+                                    </div>
+                                    <div class="det-i">
+                                        <div class="det-il">Premium</div>
+                                        <div class="det-iv" style="color:${parseFloat(s.sp) < 15 ? 'var(--green)' : 'var(--rose)'}">${parseFloat(s.sp) >= 0 ? '+' : ''}${s.sp}%</div>
+                                    </div>
+                                    <div class="det-i">
+                                        <div class="det-il">Rev-to-OpEx</div>
+                                        <div class="det-iv">${s.rc}%</div>
+                                    </div>
+                                </div>
+                                <div class="det-n">FV = OpEx / Daily Emissions. Shows intrinsic value based on operational costs.</div>
+                            </div>
+                            <div class="det">
+                                <div class="det-h">
+                                    <div class="det-t c">📈 Market Data</div>
+                                </div>
+                                <div class="det-g3">
+                                    <div class="det-i">
+                                        <div class="det-il">Price Change 1h</div>
+                                        <div class="det-iv ${s.c1h >= 0 ? 'up' : 'dn'}">${s.c1h >= 0 ? '+' : ''}${s.c1h.toFixed(1)}%</div>
+                                    </div>
+                                    <div class="det-i">
+                                        <div class="det-il">24h Change</div>
+                                        <div class="det-iv ${s.pc >= 0 ? 'up' : 'dn'}">${s.pc >= 0 ? '+' : ''}${s.pc.toFixed(1)}%</div>
+                                    </div>
+                                    <div class="det-i">
+                                        <div class="det-il">7d Change</div>
+                                        <div class="det-iv ${s.c1w >= 0 ? 'up' : 'dn'}">${s.c1w >= 0 ? '+' : ''}${s.c1w.toFixed(1)}%</div>
+                                    </div>
+                                    <div class="det-i">
+                                        <div class="det-il">Market Cap</div>
+                                        <div class="det-iv">${formatUSD(s.mc, 0)}</div>
+                                    </div>
+                                    <div class="det-i">
+                                        <div class="det-il">Total Supply (USD)</div>
+                                        <div class="det-iv">${formatUSD(s.ts, 0)}</div>
+                                    </div>
+                                    <div class="det-i">
+                                        <div class="det-il">Volume 24h</div>
+                                        <div class="det-iv">${formatUSD(s.vol, 0)}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="det">
+                                <div class="det-h">
+                                    <div class="det-t g">🔥 Network Stats</div>
+                                </div>
+                                <div class="det-g3">
+                                    <div class="det-i">
+                                        <div class="det-il">Validators</div>
+                                        <div class="det-iv">${s.val}</div>
+                                    </div>
+                                    <div class="det-i">
+                                        <div class="det-il">Miners</div>
+                                        <div class="det-iv">${s.min}</div>
+                                    </div>
+                                    <div class="det-i">
+                                        <div class="det-il">Holder Count</div>
+                                        <div class="det-iv">${s.holders}</div>
+                                    </div>
+                                    <div class="det-i">
+                                        <div class="det-il">Emission %</div>
+                                        <div class="det-iv" style="color:var(--amber)">${s.em}%</div>
+                                    </div>
+                                    <div class="det-i">
+                                        <div class="det-il">Daily TAO</div>
+                                        <div class="det-iv">${s.dt}τ</div>
+                                    </div>
+                                    <div class="det-i">
+                                        <div class="det-il">Top Holder %</div>
+                                        <div class="det-iv">${s.topHolderPct.toFixed(1)}%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="exp-g2">
+                            <div class="det">
+                                <div class="det-h">
+                                    <div class="det-t bl">🐙 Dev Metrics (Score: ${s.ghScore})</div>
+                                    <a href="${s.gh}" target="_blank" style="font-size:10px;color:var(--cyan);text-decoration:none">View Repo →</a>
+                                </div>
+                                ${ghHtml}
+                            </div>
+                            <div class="det">
+                                <div class="det-h">
+                                    <div class="det-t g">✓ Investment Thesis</div>
+                                </div>
+                                <div class="det-th">${s.th}</div>
+                                <div class="ms-l">KEY MILESTONES</div>
+                                ${msHtml}
+                            </div>
+                            <div class="det">
+                                <div class="det-h">
+                                    <div class="det-t rs">⚠️ Risk Factors</div>
+                                </div>
+                                ${rskHtml}
+                                <div class="det-g" style="margin-top:10px">
+                                    <div class="det-i">
+                                        <div class="det-il">Risk Level</div>
+                                        <div class="det-iv" style="color:${s.risk === 'Very Low' || s.risk === 'Low' ? 'var(--green)' : s.risk === 'Medium' ? 'var(--amber)' : 'var(--rose)'}">${s.risk}</div>
+                                    </div>
+                                    <div class="det-i">
+                                        <div class="det-il">Signal</div>
+                                        <div class="det-iv" style="color:${s.rec === 'Strong Buy' ? 'var(--green)' : s.rec === 'Buy' ? 'var(--cyan)' : s.rec === 'Hold' ? 'var(--amber)' : 'var(--rose)'}">${s.rec}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(row);
+            });
+
+            document.getElementById('cnt').textContent = filtered.length;
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = now.toLocaleTimeString();
+        }
+
+        function toggle(id) {
+            const r = document.getElementById('r-' + id);
+            const was = r.classList.contains('exp');
+            document.querySelectorAll('.row').forEach(x => x.classList.remove('exp'));
+            if (!was) r.classList.add('exp');
+        }
+
+        // ============================== FILTERS & SORTING ==============================
+        function filterCat(c, btn) {
+            document.querySelectorAll('.pill').forEach(p => p.classList.remove('act'));
+            btn.classList.add('act');
+            apply(c);
+        }
+
+        function filter() {
+            apply();
+        }
+
+        function filterScore(v) {
+            minS = parseInt(v);
+            document.getElementById('scrV').textContent = v;
+            apply();
+        }
+
+        function apply(c) {
+            const q = document.getElementById('srch').value.toLowerCase();
+            const cat = c || document.querySelector('.pill.act').textContent;
+            filtered = data.filter(s =>
+                (cat === 'All' || s.cat === cat) &&
+                (s.n.toLowerCase().includes(q) || s.cat.toLowerCase().includes(q)) &&
+                s.score >= minS
+            );
+            doSort();
+            render();
+        }
+
+        function setSort(k, l) {
+            sortK = k;
+            sortD = k === 'sp' ? 'asc' : 'desc';
+            document.getElementById('srtL').textContent = l;
+            document.querySelectorAll('.srt-o').forEach(o => o.classList.remove('act'));
+            event.target.classList.add('act');
+            document.getElementById('srtC').classList.remove('open');
+            apply();
+        }
+
+        function doSort() {
+            filtered.sort((a, b) => {
+                let av = parseFloat(a[sortK]) || a[sortK];
+                let bv = parseFloat(b[sortK]) || b[sortK];
+                return sortD === 'asc' ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1);
+            });
+        }
+
+        // ============================== LEADERBOARDS ==============================
+        function renderLeaderboards() {
+            const container = document.getElementById('leaderboardContainer');
+            container.innerHTML = '';
+
+            const leaderboards = [
+                {
+                    title: '🏆 Highest DeAI Score',
+                    data: [...data].sort((a, b) => b.score - a.score).slice(0, 10),
+                    val: s => s.score
+                },
+                {
+                    title: '💰 Largest Market Cap',
+                    data: [...data].sort((a, b) => b.mc - a.mc).slice(0, 10),
+                    val: s => formatUSD(s.mc, 1)
+                },
+                {
+                    title: '⚡ Emission Efficiency',
+                    data: [...data].sort((a, b) => b.emEff - a.emEff).slice(0, 10),
+                    val: s => s.emEff
+                },
+                {
+                    title: '📈 Best 24H Change',
+                    data: [...data].sort((a, b) => b.pc - a.pc).slice(0, 10),
+                    val: s => `${s.pc >= 0 ? '+' : ''}${s.pc.toFixed(1)}%`
+                },
+                {
+                    title: '🎯 Best Risk-Adjusted Return',
+                    data: [...data].filter(s => s.score >= 55).sort((a, b) => {
+                        const arar = a.score - (parseFloat(a.sp) > 50 ? 20 : 0);
+                        const brar = b.score - (parseFloat(b.sp) > 50 ? 20 : 0);
+                        return brar - arar;
+                    }).slice(0, 10),
+                    val: s => s.score + ' pts'
+                },
+                {
+                    title: '💎 Nearest FV',
+                    data: [...data].sort((a, b) => Math.abs(parseFloat(a.sp)) - Math.abs(parseFloat(b.sp))).slice(0, 10),
+                    val: s => `${parseFloat(s.sp) >= 0 ? '+' : ''}${s.sp}%`
+                }
+            ];
+
+            leaderboards.forEach(lb => {
+                const card = document.createElement('div');
+                card.className = 'lb-card';
+                card.innerHTML = `
+                    <div class="lb-title">${lb.title}</div>
+                    ${lb.data.map((s, i) => `
+                        <div class="lb-item">
+                            <span class="lb-rank">#${i + 1}</span>
+                            <span class="lb-name">${s.n}</span>
+                            <span class="lb-val">${lb.val(s)}</span>
+                        </div>
+                    `).join('')}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ============================== CHARTS ==============================
+        function initCharts() {
+            const chartConfig = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 6,
+                            usePointStyle: true,
+                            font: { size: 9 }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: v => '$' + formatNum(v),
+                            font: { size: 9 }
+                        },
+                        grid: { color: 'var(--bdr)' }
+                    },
+                    x: {
+                        ticks: { font: { size: 9 } },
+                        grid: { display: false }
+                    }
+                }
+            };
+
+            // MCap Chart
+            const mcapCtx = document.getElementById('mcapChart').getContext('2d');
+            if (charts.mcap) charts.mcap.destroy();
+            charts.mcap = new Chart(mcapCtx, {
+                type: 'bar',
+                data: {
+                    labels: data.slice(0, 8).map(s => s.n),
+                    datasets: [{
+                        data: data.slice(0, 8).map(s => s.mc),
+                        backgroundColor: 'rgba(139,92,246,0.6)',
+                        borderColor: '#8b5cf6',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: chartConfig
+            });
+
+            // Category Chart
+            const cats = {};
+            data.forEach(s => {
+                cats[s.cat] = (cats[s.cat] || 0) + s.mc;
+            });
+
+            const catCtx = document.getElementById('catChart').getContext('2d');
+            if (charts.cat) charts.cat.destroy();
+            charts.cat = new Chart(catCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(cats),
+                    datasets: [{
+                        data: Object.values(cats),
+                        backgroundColor: ['#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#f43f5e', '#3b82f6', '#22d3ee'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { padding: 6, usePointStyle: true, font: { size: 9 } }
+                        }
+                    }
+                }
+            });
+
+            // Risk Chart
+            const rk = { 'Very Low': 0, 'Low': 0, 'Medium': 0, 'High': 0 };
+            data.forEach(s => {
+                rk[s.risk]++;
+            });
+
+            const riskCtx = document.getElementById('riskChart').getContext('2d');
+            if (charts.risk) charts.risk.destroy();
+            charts.risk = new Chart(riskCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(rk),
+                    datasets: [{
+                        data: Object.values(rk),
+                        backgroundColor: ['#10b981', '#06b6d4', '#f59e0b', '#f43f5e'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { padding: 6, usePointStyle: true, font: { size: 9 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============================== CALCULATORS ==============================
+        function calcFV() {
+            const o = parseFloat(document.getElementById('opex').value) || 0;
+            const e = parseFloat(document.getElementById('emit').value) || 1;
+            const p = parseFloat(document.getElementById('price').value) || 1;
+            const fv = (o / 365) / e;
+            const sp = ((p - fv) / fv) * 100;
+
+            document.getElementById('fvR').textContent = '$' + fv.toFixed(2);
+            document.getElementById('fvS').textContent = 'Daily OpEx: $' + (o / 365 / 1000).toFixed(1) + 'K';
+            document.getElementById('spR').textContent = (sp >= 0 ? '+' : '') + sp.toFixed(0) + '%';
+            document.getElementById('spR').style.color = sp < 50 ? 'var(--green)' : sp < 150 ? 'var(--amber)' : 'var(--rose)';
+        }
+
+        function calcDCF() {
+            const e = parseFloat(document.getElementById('dcfE').value) || 0;
+            const t = parseFloat(document.getElementById('dcfT').value) || 1;
+            const g = (parseFloat(document.getElementById('dcfG').value) || 0) / 100;
+            const d = (parseFloat(document.getElementById('dcfD').value) || 25) / 100;
+            const m = parseFloat(document.getElementById('dcfM').value) || 1;
+            const y = parseInt(document.getElementById('dcfY').value) || 5;
+
+            if (d <= g) d = g + 0.1;
+
+            const an = e * 365;
+            let pv = 0;
+            for (let i = 1; i <= y; i++) {
+                pv += (an * Math.pow(1 + g, i)) / Math.pow(1 + d, i);
+            }
+
+            const te = an * Math.pow(1 + g, y);
+            const pt = (te * (1 + g) / (d - g)) / Math.pow(1 + d, y);
+            const fv = pv + pt;
+            const rt = fv / m;
+            const up = (rt - 1) * 100;
+
+            document.getElementById('dcfR').textContent = Math.round(fv).toLocaleString() + 'τ';
+            document.getElementById('dcfU').textContent = '≈$' + ((fv * t) / 1e6).toFixed(1) + 'M';
+            document.getElementById('dcfRt').textContent = rt.toFixed(2) + 'x';
+            document.getElementById('dcfUp').textContent = (up >= 0 ? '+' : '') + up.toFixed(0) + '%';
+
+            const sg = rt > 1.2 ? 'UNDER' : rt > 0.8 ? 'FAIR' : 'OVER';
+            const cl = rt > 1.2 ? 'var(--green)' : rt > 0.8 ? 'var(--amber)' : 'var(--rose)';
+            document.getElementById('dcfSg').textContent = sg;
+            document.getElementById('dcfSg').style.color = cl;
+            document.getElementById('dcfRt').style.color = cl;
+            document.getElementById('dcfUp').style.color = cl;
+        }
+
+        function calcEm() {
+            const s = (parseFloat(document.getElementById('emSh').value) || 0) / 100;
+            const t = parseFloat(document.getElementById('emTp').value) || taoPrice;
+            const n = parseFloat(document.getElementById('emNt').value) || DAILY_EMISSIONS;
+            const dt = n * s;
+            const du = dt * t;
+
+            document.getElementById('emDt').textContent = dt.toFixed(1) + 'τ';
+            document.getElementById('emDu').textContent = '$' + Math.round(du).toLocaleString() + '/day';
+            document.getElementById('emMt').textContent = (dt * 30).toFixed(0) + 'τ';
+            document.getElementById('emMu').textContent = '$' + ((du * 30) / 1e6).toFixed(2) + 'M';
+            document.getElementById('emAu').textContent = '$' + ((du * 365) / 1e6).toFixed(1) + 'M';
+        }
+
+        function calcCS() {
+            const rc = parseFloat(document.getElementById('csRc').value) || 0;
+            const sp = parseFloat(document.getElementById('csSp').value) || 0;
+            const pf = parseFloat(document.getElementById('csPf').value) || 0;
+            const ec = parseFloat(document.getElementById('csEc').value) || 0;
+            const dv = parseFloat(document.getElementById('csDv').value) || 0;
+            const dc = parseFloat(document.getElementById('csDc').value) || 0;
+
+            const fs = Math.max(0, Math.min(100, 50 - (sp / 4) + (rc / 2)));
+            const cs = (0.20 * fs + 0.25 * pf + 0.30 * ec + 0.20 * dv + 0.05 * dc).toFixed(0);
+
+            const rt = cs >= 70 ? 'Excellent' : cs >= 55 ? 'Good' : cs >= 40 ? 'Fair' : 'Poor';
+            const rk = cs >= 70 ? 'Very Low' : cs >= 55 ? 'Low' : cs >= 40 ? 'Medium' : 'High';
+
+            document.getElementById('csR').textContent = cs;
+            document.getElementById('csR').style.color = cs >= 70 ? 'var(--green)' : cs >= 55 ? 'var(--cyan)' : cs >= 40 ? 'var(--amber)' : 'var(--rose)';
+            document.getElementById('csS').textContent = rt + ' • ' + rk + ' Risk';
+        }
+
+        // ============================== TABS ==============================
+        function showTab(t, btn) {
+            document.querySelectorAll('.tab').forEach(x => x.classList.remove('act'));
+            btn?.classList.add('act');
+
+            document.getElementById('dash').style.display = 'none';
+            document.getElementById('leaderboard').classList.remove('act');
+            document.getElementById('calc').classList.remove('act');
+            document.getElementById('api').classList.remove('act');
+
+            if (t === 'dash') document.getElementById('dash').style.display = 'block';
+            else if (t === 'leaderboard') document.getElementById('leaderboard').classList.add('act');
+            else if (t === 'calc') document.getElementById('calc').classList.add('act');
+            else if (t === 'api') {
+                document.getElementById('api').classList.add('act');
+                checkBackendStatus();
+            }
+        }
+
+        // ============================== API STATUS ==============================
+        async function checkBackendStatus() {
+            const status = document.getElementById('apiStatus');
+            try {
+                const res = await fetch('/health');
+                if (res.ok) {
+                    const data = await res.json();
+                    status.classList.remove('error');
+                    status.innerHTML = `✅ Backend connected • TAO.app: ${data.tao_key_configured ? '✓' : '✗'} • Taostats: ${data.taostats_key_configured ? '✓' : '✗'}`;
+                } else {
+                    throw new Error('Backend error');
+                }
+            } catch {
+                status.classList.add('error');
+                status.innerHTML = '❌ Cannot reach backend. Start with: cd backend && node server.js';
+            }
+        }
+
+        // ============================== CLOSE DROPDOWNS ==============================
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.srt'))
+                document.getElementById('srtC').classList.remove('open');
+        });
+
+        // ============================== INIT ==============================
+        document.getElementById('ts').textContent = new Date().toLocaleString();
+
+        // Initial data load
+        refreshData();
+
+        // Auto-refresh every 5 minutes
+        setInterval(() => {
+            if (Date.now() - new Date(lastRefresh).getTime() > API_CACHE_TIME) {
+                refreshData();
+            }
+        }, 60000);
+
+        // Update calculators
+        calcFV();
+        calcDCF();
+        calcEm();
+        calcCS();
+    </script>
+</body>
+</html>

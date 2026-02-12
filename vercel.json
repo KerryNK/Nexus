@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "buildCommand": "npm install --prefix backend && npm install --prefix frontend 2>/dev/null || true",
+  "devCommand": "cd backend && node server-enhanced.js",
+  "public": "frontend",
+  "functions": {
+    "backend/server-enhanced.js": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/backend/server-enhanced.js"
+    },
+    {
+      "src": "/health",
+      "dest": "/backend/server-enhanced.js"
+    },
+    {
+      "src": "/.*",
+      "dest": "/frontend/Nexus-Pro.html"
+    }
+  ],
+  "env": {
+    "TAO_APP_API_KEY": "@neo-tao-api-key",
+    "TAOSTATS_API_KEY": "@neo-taostats-api-key",
+    "NODE_ENV": "production"
+  }
+}

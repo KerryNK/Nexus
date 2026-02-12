@@ -1,0 +1,45 @@
+{
+  "name": "deai-nexus-backend",
+  "version": "3.0.0",
+  "description": "Backend proxy server for DeAI Nexus Terminal v3 - Production-ready Bittensor subnet analytics dashboard",
+  "main": "server-enhanced.js",
+  "scripts": {
+    "start": "node server-enhanced.js",
+    "start:original": "node server.js",
+    "dev": "nodemon server-enhanced.js",
+    "test": "node -e \"console.log('Health check: curl http://localhost:4000/health')\"",
+    "clean": "rm -rf node_modules package-lock.json"
+  },
+  "keywords": [
+    "bittensor",
+    "tao",
+    "subnet",
+    "analytics",
+    "dashboard",
+    "api-proxy",
+    "real-time",
+    "metrics",
+    "scoring",
+    "decentralized-ai"
+  ],
+  "author": "DeAI Nexus Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/nexus.git"
+  },
+  "homepage": "https://github.com/yourusername/nexus#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}
