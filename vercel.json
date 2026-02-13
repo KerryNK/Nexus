@@ -2,27 +2,6 @@
   "version": 2,
   "buildCommand": "npm install --prefix backend",
   "devCommand": "cd backend && node server-enhanced.js",
-  "functions": {
-    "backend/server-enhanced.js": {
-      "memory": 1024,
-      "maxDuration": 60,
-      "runtime": "nodejs18.x"
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/backend/server-enhanced.js"
-    },
-    {
-      "source": "/health",
-      "destination": "/backend/server-enhanced.js"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/frontend/Nexus-Pro.html"
-    }
-  ],
   "env": {
     "NODE_ENV": "production"
   }

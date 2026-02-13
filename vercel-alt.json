@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "buildCommand": "npm install --prefix backend",
+  "devCommand": "cd backend && node server-enhanced.js",
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/backend/server-enhanced.js"
+    },
+    {
+      "src": "/health",
+      "dest": "/backend/server-enhanced.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/Nexus-Pro.html"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}

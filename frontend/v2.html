@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeAI Nexus Terminal v2.0 - Bittensor Analytics Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #00d9ff;
+            --secondary: #1a1a2e;
+            --accent: #16213e;
+            --success: #06d6a0;
+            --danger: #ef476f;
+            --warning: #ffd166;
+            --info: #118ab2;
+            --text-light: #eaeaea;
+            --text-dark: #0f0f1e;
+            --border: #2c2c54;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--secondary);
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* ==================== HEADER ====================*/
+        header {
+            background: var(--accent);
+            border-bottom: 2px solid var(--primary);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0, 217, 255, 0.1);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .nav-center {
+            display: flex;
+            gap: 1rem;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .nav-center button {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 0.95rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .nav-center button:hover,
+        .nav-center button.active {
+            background: var(--primary);
+            color: var(--text-dark);
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .user-info {
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 217, 255, 0.1);
+            border-radius: 6px;
+        }
+
+        /* ==================== MODALS ====================*/
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--accent);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            background: rgba(0, 217, 255, 0.05);
+            color: var(--text-light);
+            border-radius: 6px;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--text-dark);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* ==================== MAIN ====================*/
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h2 {
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .filters {
+            background: var(--accent);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .filter-group label {
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 0.5rem;
+            background: rgba(0, 217, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-light);
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        .leaderboards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .leaderboard {
+            background: var(--accent);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .leaderboard-title {
+            background: linear-gradient(135deg, var(--primary), var(--info));
+            padding: 1rem;
+            color: var(--text-dark);
+            font-weight: bold;
+        }
+
+        .leaderboard-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-rank {
+            min-width: 30px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .item-name {
+            flex: 1;
+            margin: 0 0.5rem;
+        }
+
+        .item-score {
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .scoring-table {
+            background: var(--accent);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow-x: auto;
+            margin-bottom: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, var(--primary), var(--info));
+            color: var(--text-dark);
+            font-weight: bold;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+        }
+
+        th {
+            font-size: 0.9rem;
+        }
+
+        tbody tr:hover {
+            background: rgba(0, 217, 255, 0.1);
+        }
+
+        td {
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .score-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .score-high {
+            background: rgba(6, 214, 160, 0.2);
+            color: var(--success);
+        }
+
+        .score-medium {
+            background: rgba(255, 209, 102, 0.2);
+            color: var(--warning);
+        }
+
+        .score-low {
+            background: rgba(239, 71, 111, 0.2);
+            color: var(--danger);
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            margin: 0 0.2rem;
+            font-size: 0.8rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: rgba(0, 217, 255, 0.2);
+            color: var(--primary);
+        }
+
+        .action-btn:hover {
+            background: var(--primary);
+            color: var(--text-dark);
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .message.success {
+            background: rgba(6, 214, 160, 0.2);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .message.error {
+            background: rgba(239, 71, 111, 0.2);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        [style*="display: none"] {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+            }
+
+            .nav-center {
+                order: 3;
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .leaderboards {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.8rem;
+            }
+
+            th, td {
+                padding: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">🚀 DEAI Nexus Terminal v2.0</div>
+            <div class="nav-center">
+                <button class="nav-btn active" data-section="leaderboards">Leaderboards</button>
+                <button class="nav-btn" data-section="scores">Scores</button>
+                <button class="nav-btn" data-section="favorites">Favorites</button>
+                <button class="nav-btn" data-section="watchlist">Watchlist</button>
+            </div>
+            <div class="nav-right">
+                <button onclick="toggleTheme()" class="btn btn-secondary">🌙 Theme</button>
+                <div class="user-info" id="userInfo">
+                    <span id="userName">User</span>
+                    <button onclick="logout()" class="btn btn-danger">Logout</button>
+                </div>
+                <div id="authButtons">
+                    <button onclick="showLoginModal()" class="btn btn-primary">Login</button>
+                    <button onclick="showRegisterModal()" class="btn btn-secondary">Register</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 1rem; color: var(--primary);">Login</h3>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Username or Email</label>
+                    <input type="text" id="loginUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+                <button type="button" onclick="closeModal('loginModal')" class="btn btn-secondary" style="width: 100%; margin-top: 0.5rem;">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 1rem; color: var(--primary);">Register</h3>
+            <form onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="regUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="regEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="regPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Register</button>
+                <button type="button" onclick="closeModal('registerModal')" class="btn btn-secondary" style="width: 100%; margin-top: 0.5rem;">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="message"></div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-group">
+                <label>Category</label>
+                <select id="categoryFilter">
+                    <option value="">All Categories</option>
+                    <option value="Inference">Inference</option>
+                    <option value="Data Preparation">Data Preparation</option>
+                    <option value="Text Prompt">Text Prompt</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Min Score</label>
+                <input type="number" id="minScoreFilter" min="0" max="100" value="0">
+            </div>
+            <div class="filter-group">
+                <label>Sort By</label>
+                <select id="sortByFilter">
+                    <option value="composite">Composite Score</option>
+                    <option value="marketCap">Market Cap</option>
+                    <option value="efficiency">Efficiency</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <button onclick="applyFilters()" class="btn btn-primary">Apply</button>
+            </div>
+        </div>
+
+        <!-- Leaderboards Section -->
+        <div id="leaderboardsSection">
+            <h2>📊 Top Performers</h2>
+            <div class="leaderboards" id="leaderboards"></div>
+        </div>
+
+        <!-- Scores Table Section -->
+        <div id="scoresSection" style="display: none;">
+            <h2>💹 Subnet Scores</h2>
+            <div class="scoring-table">
+                <table id="scoresTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Score</th>
+                            <th>Risk</th>
+                            <th>Market Cap</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scoresBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Favorites Section -->
+        <div id="favoritesSection" style="display: none;">
+            <h2>⭐ Favorites</h2>
+            <div class="scoring-table">
+                <table id="favoritesTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Score</th>
+                            <th>Market Cap</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="favoritesBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Watchlist Section -->
+        <div id="watchlistSection" style="display: none;">
+            <h2>👁️ Watchlist</h2>
+            <div class="scoring-table">
+                <table id="watchlistTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Score</th>
+                            <th>Market Cap</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="watchlistBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+        let currentUser = null;
+        let authToken = localStorage.getItem('token');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            if (authToken) checkUser();
+            loadLeaderboards();
+            setupNavigation();
+        });
+
+        // Navigation
+        function setupNavigation() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const section = e.target.dataset.section;
+                    switchSection(section);
+                    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                });
+            });
+        }
+
+        function switchSection(section) {
+            document.querySelectorAll('[id*="Section"]').forEach(el => el.style.display = 'none');
+            document.getElementById(section + 'Section').style.display = 'block';
+
+            if (section === 'scores') loadScores();
+            if (section === 'favorites') loadFavorites();
+            if (section === 'watchlist') loadWatchlist();
+        }
+
+        // Auth
+        function showLoginModal() {
+            document.getElementById('loginModal').classList.add('show');
+        }
+
+        function showRegisterModal() {
+            document.getElementById('registerModal').classList.add('show');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const res = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    authToken = data.token;
+                    localStorage.setItem('token', authToken);
+                    currentUser = data.user;
+                    closeModal('loginModal');
+                    updateUserUI();
+                    showMessage('Login successful!', 'success');
+                    loadLeaderboards();
+                } else {
+                    showMessage(data.error || 'Login failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+
+            try {
+                const res = await fetch(`${API_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    authToken = data.token;
+                    localStorage.setItem('token', authToken);
+                    currentUser = data.user;
+                    closeModal('registerModal');
+                    updateUserUI();
+                    showMessage('Registration successful!', 'success');
+                } else {
+                    showMessage(data.error || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function logout() {
+            authToken = null;
+            localStorage.removeItem('token');
+            currentUser = null;
+            updateUserUI();
+            showMessage('Logged out', 'success');
+            loadLeaderboards();
+        }
+
+        async function checkUser() {
+            try {
+                const res = await fetch(`${API_URL}/api/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    currentUser = data.user;
+                    updateUserUI();
+                }
+            } catch (e) {
+                authToken = null;
+                localStorage.removeItem('token');
+            }
+        }
+
+        function updateUserUI() {
+            const userInfo = document.getElementById('userInfo');
+            const authButtons = document.getElementById('authButtons');
+
+            if (currentUser) {
+                document.getElementById('userName').textContent = currentUser.username;
+                userInfo.style.display = 'flex';
+                authButtons.style.display = 'none';
+            } else {
+                userInfo.style.display = 'none';
+                authButtons.style.display = 'flex';
+            }
+        }
+
+        // Data Loading
+        async function loadLeaderboards() {
+            try {
+                const res = await fetch(`${API_URL}/api/scoring/leaderboards?limit=10`);
+                const data = await res.json();
+
+                const container = document.getElementById('leaderboards');
+                container.innerHTML = '';
+
+                const leaderboards = [
+                    { title: '🏆 Top by DeAI Score', data: data.leaderboards.topScore },
+                    { title: '💰 Top by Market Cap', data: data.leaderboards.topMarketCap },
+                    { title: '📈 Best Value', data: data.leaderboards.bestValue },
+                    { title: '⚡ Top Efficiency', data: data.leaderboards.topEfficiency }
+                ];
+
+                leaderboards.forEach(lb => {
+                    const html = `
+                        <div class="leaderboard">
+                            <div class="leaderboard-title">${lb.title}</div>
+                            ${lb.data.slice(0, 10).map((subnet, idx) => `
+                                <div class="leaderboard-item">
+                                    <span class="item-rank">#${idx + 1}</span>
+                                    <span class="item-name">${subnet.name}</span>
+                                    <span class="item-score">${subnet.scores?.composite?.toFixed(1) || 'N/A'}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    container.innerHTML += html;
+                });
+            } catch (error) {
+                showMessage('Error loading leaderboards', 'error');
+            }
+        }
+
+        async function loadScores() {
+            try {
+                const category = document.getElementById('categoryFilter').value;
+                const minScore = document.getElementById('minScoreFilter').value;
+                const url = new URL(`${API_URL}/api/scoring`);
+                if (category) url.searchParams.append('category', category);
+                url.searchParams.append('minScore', minScore);
+
+                const res = await fetch(url);
+                const data = await res.json();
+
+                const tbody = document.getElementById('scoresBody');
+                tbody.innerHTML = data.scores.map((subnet, idx) => {
+                    let scoreClass = subnet.scores.composite >= 70 ? 'score-high' : 
+                                   subnet.scores.composite >= 40 ? 'score-medium' : 'score-low';
+                    return `
+                        <tr>
+                            <td>${idx + 1}</td>
+                            <td>${subnet.name}</td>
+                            <td>${subnet.category || 'N/A'}</td>
+                            <td><span class="score-badge ${scoreClass}">${subnet.scores.composite.toFixed(1)}</span></td>
+                            <td>${subnet.risk || 'N/A'}</td>
+                            <td>$${(subnet.metrics?.marketCap || 0).toLocaleString()}</td>
+                            <td>
+                                ${authToken ? `<button class="action-btn" onclick="toggleFavorite(${subnet.netuid})">⭐ Add</button>` : ''}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                showMessage('Error loading scores', 'error');
+            }
+        }
+
+        async function loadFavorites() {
+            if (!authToken) {
+                showMessage('Please login to view favorites', 'error');
+                return;
+            }
+            try {
+                const res = await fetch(`${API_URL}/api/scoring/user/favorites`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await res.json();
+
+                const tbody = document.getElementById('favoritesBody');
+                tbody.innerHTML = data.favorites?.length > 0 ? data.favorites.map(subnet => `
+                    <tr>
+                        <td>${subnet.name}</td>
+                        <td>${subnet.category || 'N/A'}</td>
+                        <td><span class="score-badge score-high">${subnet.scores.composite.toFixed(1)}</span></td>
+                        <td>$${(subnet.metrics?.marketCap || 0).toLocaleString()}</td>
+                        <td><button class="action-btn" onclick="toggleFavorite(${subnet.netuid})">Remove</button></td>
+                    </tr>
+                `).join('') : '<tr><td colspan="5">No favorites yet</td></tr>';
+            } catch (error) {
+                showMessage('Error loading favorites', 'error');
+            }
+        }
+
+        async function loadWatchlist() {
+            if (!authToken) {
+                showMessage('Please login to view watchlist', 'error');
+                return;
+            }
+            try {
+                const res = await fetch(`${API_URL}/api/scoring/user/watchlist`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await res.json();
+
+                const tbody = document.getElementById('watchlistBody');
+                tbody.innerHTML = data.watchlist?.length > 0 ? data.watchlist.map(subnet => `
+                    <tr>
+                        <td>${subnet.name}</td>
+                        <td>${subnet.category || 'N/A'}</td>
+                        <td><span class="score-badge score-high">${subnet.scores.composite.toFixed(1)}</span></td>
+                        <td>$${(subnet.metrics?.marketCap || 0).toLocaleString()}</td>
+                        <td><button class="action-btn" onclick="toggleWatchlist(${subnet.netuid})">Remove</button></td>
+                    </tr>
+                `).join('') : '<tr><td colspan="5">No items in watchlist</td></tr>';
+            } catch (error) {
+                showMessage('Error loading watchlist', 'error');
+            }
+        }
+
+        async function toggleFavorite(netuid) {
+            if (!authToken) {
+                showMessage('Please login', 'error');
+                return;
+            }
+            try {
+                const res = await fetch(`${API_URL}/api/auth/favorites/${netuid}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (res.ok) {
+                    showMessage('Added to favorites', 'success');
+                    loadFavorites();
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function toggleWatchlist(netuid) {
+            if (!authToken) {
+                showMessage('Please login', 'error');
+                return;
+            }
+            try {
+                const res = await fetch(`${API_URL}/api/auth/watchlist/${netuid}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (res.ok) {
+                    showMessage('Added to watchlist', 'success');
+                    loadWatchlist();
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+
+        function applyFilters() {
+            loadScores();
+        }
+
+        function toggleTheme() {
+            document.body.style.filter = document.body.style.filter === 'invert(1)' ? 'none' : 'invert(1)';
+        }
+
+        function showMessage(msg, type) {
+            const el = document.getElementById('message');
+            el.innerHTML = `<div class="message ${type}">${msg}</div>`;
+            setTimeout(() => { el.innerHTML = ''; }, 3000);
+        }
+
+        // Close modals on background click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
