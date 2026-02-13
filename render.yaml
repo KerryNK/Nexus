@@ -5,7 +5,7 @@ services:
     region: oregon
     plan: free
     buildCommand: cd backend && npm install
-    startCommand: cd backend && node server-enhanced.js
+    startCommand: cd backend && node server.js
     envVars:
       - key: TAO_APP_API_KEY
         sync: false

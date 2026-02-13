@@ -1,15 +1,15 @@
 {
   "version": 2,
   "buildCommand": "npm install --prefix backend",
-  "devCommand": "cd backend && node server-enhanced.js",
+  "devCommand": "cd backend && node server.js",
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/backend/server-enhanced.js"
+      "dest": "/backend/server.js"
     },
     {
       "src": "/health",
-      "dest": "/backend/server-enhanced.js"
+      "dest": "/backend/server.js"
     },
     {
       "src": "/(.*)",

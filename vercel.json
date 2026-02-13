@@ -1,7 +1,7 @@
 {
   "version": 2,
   "buildCommand": "npm install --prefix backend",
-  "devCommand": "cd backend && node server-enhanced.js",
+  "devCommand": "cd backend && node server.js",
   "env": {
     "NODE_ENV": "production"
   }
